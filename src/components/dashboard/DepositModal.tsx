@@ -31,7 +31,7 @@ export default function DepositModal({ open, onClose }: DepositModalProps) {
 
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('paystack-topup-initialize', {
+      const { data, error } = await supabase.functions.invoke('squad-topup-initialize', {
         body: { amount_kobo: Math.floor(naira * 100) },
       });
 
