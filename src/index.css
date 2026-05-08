@@ -8,123 +8,125 @@
 
 @layer base {
   :root {
-    /* Premium UniGig Design System - Quiet Luxury Mode */
-    --background: 40 20% 98%;
-    --foreground: 158 30% 10%;
+    /* Premium UniGig — Tech Edition (Indigo · Violet · Cyan) */
+    --background: 220 30% 99%;
+    --foreground: 222 47% 9%;
 
     --card: 0 0% 100%;
-    --card-foreground: 160 25% 10%;
+    --card-foreground: 222 47% 9%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 160 25% 10%;
+    --popover-foreground: 222 47% 9%;
 
-    /* Muted Forest Green - Primary (Quiet Luxury) */
-    --primary: 158 32% 24%;
-    --primary-foreground: 40 25% 97%;
+    /* Electric Indigo — Primary */
+    --primary: 243 75% 58%;
+    --primary-foreground: 220 30% 99%;
 
-    /* Soft Sage Tint */
-    --secondary: 150 14% 95%;
-    --secondary-foreground: 158 35% 18%;
+    /* Soft Slate Tint */
+    --secondary: 220 20% 96%;
+    --secondary-foreground: 222 47% 14%;
 
-    /* Refined Neutrals (warmer, ivory-leaning) */
-    --muted: 40 15% 95%;
-    --muted-foreground: 158 8% 42%;
+    /* Cool Neutrals */
+    --muted: 220 18% 96%;
+    --muted-foreground: 220 10% 42%;
 
-    /* Muted Antique Gold - subtle accent */
-    --accent: 40 55% 52%;
-    --accent-foreground: 158 35% 12%;
+    /* Vibrant Cyan — Accent */
+    --accent: 190 95% 50%;
+    --accent-foreground: 222 47% 9%;
 
-    --destructive: 0 65% 52%;
-    --destructive-foreground: 40 25% 97%;
+    --destructive: 0 72% 55%;
+    --destructive-foreground: 220 30% 99%;
 
-    --border: 150 10% 90%;
-    --input: 150 10% 90%;
-    --ring: 158 32% 24%;
+    --border: 220 15% 91%;
+    --input: 220 15% 91%;
+    --ring: 243 75% 58%;
 
     --radius: 1rem;
 
-    /* Custom UniGig tokens — muted */
-    --forest: 158 32% 24%;
-    --forest-dark: 158 38% 16%;
-    --forest-light: 156 22% 38%;
-    --gold: 40 55% 52%;
-    --gold-dark: 38 50% 42%;
-    --gold-glow: 42 60% 65%;
-    --emerald: 158 40% 32%;
-    
-    /* Premium Gradients (subtler) */
-    --gradient-hero: linear-gradient(160deg, hsl(158, 32%, 24%) 0%, hsl(158, 40%, 16%) 100%);
-    --gradient-gold: linear-gradient(135deg, hsl(40, 55%, 52%) 0%, hsl(38, 50%, 42%) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(0, 0%, 100%) 0%, hsl(40, 15%, 98%) 100%);
-    --gradient-glass: linear-gradient(135deg, rgba(255,253,250,0.95) 0%, rgba(255,253,250,0.8) 100%);
-    --gradient-mesh: radial-gradient(at 40% 20%, hsl(40, 55%, 52%, 0.05) 0px, transparent 50%),
-                     radial-gradient(at 80% 80%, hsl(158, 32%, 24%, 0.04) 0px, transparent 50%);
+    /* Brand tokens (kept names for compat, retuned for tech aesthetic) */
+    --forest: 243 75% 58%;
+    --forest-dark: 245 70% 42%;
+    --forest-light: 240 80% 70%;
+    --gold: 190 95% 50%;
+    --gold-dark: 195 90% 38%;
+    --gold-glow: 185 100% 65%;
+    --emerald: 270 80% 60%;
 
-    /* Refined Shadows — softer, tighter */
-    --shadow-xs: 0 1px 2px hsl(158 20% 15% / 0.04);
-    --shadow-sm: 0 1px 2px hsl(158 20% 15% / 0.05), 0 1px 1px hsl(158 20% 15% / 0.03);
-    --shadow-md: 0 2px 4px hsl(158 20% 15% / 0.04), 0 4px 8px hsl(158 20% 15% / 0.04);
-    --shadow-lg: 0 4px 6px hsl(158 20% 15% / 0.04), 0 12px 24px hsl(158 20% 15% / 0.06);
-    --shadow-xl: 0 8px 16px hsl(158 20% 15% / 0.05), 0 20px 40px hsl(158 20% 15% / 0.08);
-    --shadow-2xl: 0 24px 48px -12px hsl(158 25% 12% / 0.12);
-    --shadow-gold: 0 2px 12px -2px hsl(40 55% 52% / 0.25);
-    --shadow-glow: 0 0 32px -8px hsl(158 32% 24% / 0.18);
-    --shadow-inner-glow: inset 0 1px 0 hsl(0 0% 100% / 0.08);
+    /* Premium Tech Gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(243 75% 58%) 0%, hsl(270 80% 55%) 50%, hsl(190 95% 50%) 100%);
+    --gradient-gold: linear-gradient(135deg, hsl(190 95% 50%) 0%, hsl(243 75% 58%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(220 30% 98%) 100%);
+    --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.92) 0%, rgba(245,247,255,0.78) 100%);
+    --gradient-mesh: radial-gradient(at 20% 10%, hsl(243 75% 58% / 0.08) 0px, transparent 50%),
+                     radial-gradient(at 85% 80%, hsl(190 95% 50% / 0.08) 0px, transparent 50%),
+                     radial-gradient(at 50% 50%, hsl(270 80% 60% / 0.05) 0px, transparent 60%);
 
-    --sidebar-background: 0 0% 99%;
-    --sidebar-foreground: 160 25% 10%;
-    --sidebar-primary: 152 45% 28%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 152 20% 96%;
-    --sidebar-accent-foreground: 152 45% 20%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 152 45% 28%;
+    /* Crisp tinted shadows */
+    --shadow-xs: 0 1px 2px hsl(243 40% 20% / 0.05);
+    --shadow-sm: 0 1px 2px hsl(243 40% 20% / 0.06), 0 1px 1px hsl(243 40% 20% / 0.03);
+    --shadow-md: 0 2px 4px hsl(243 40% 20% / 0.05), 0 4px 12px hsl(243 40% 20% / 0.05);
+    --shadow-lg: 0 6px 12px hsl(243 40% 20% / 0.06), 0 16px 32px hsl(243 40% 20% / 0.08);
+    --shadow-xl: 0 10px 24px hsl(243 40% 20% / 0.07), 0 24px 48px hsl(243 40% 20% / 0.10);
+    --shadow-2xl: 0 30px 60px -12px hsl(243 50% 18% / 0.18);
+    --shadow-gold: 0 4px 18px -2px hsl(190 95% 50% / 0.40);
+    --shadow-glow: 0 0 36px -6px hsl(243 75% 58% / 0.35);
+    --shadow-inner-glow: inset 0 1px 0 hsl(0 0% 100% / 0.10);
+
+    --sidebar-background: 220 30% 99%;
+    --sidebar-foreground: 222 47% 9%;
+    --sidebar-primary: 243 75% 58%;
+    --sidebar-primary-foreground: 220 30% 99%;
+    --sidebar-accent: 220 20% 96%;
+    --sidebar-accent-foreground: 243 75% 30%;
+    --sidebar-border: 220 15% 91%;
+    --sidebar-ring: 243 75% 58%;
   }
 
   .dark {
-    --background: 160 20% 6%;
-    --foreground: 0 0% 95%;
+    --background: 222 47% 5%;
+    --foreground: 220 30% 96%;
 
-    --card: 160 18% 9%;
-    --card-foreground: 0 0% 95%;
+    --card: 222 40% 8%;
+    --card-foreground: 220 30% 96%;
 
-    --popover: 160 18% 9%;
-    --popover-foreground: 0 0% 95%;
+    --popover: 222 40% 8%;
+    --popover-foreground: 220 30% 96%;
 
-    --primary: 152 50% 45%;
-    --primary-foreground: 160 20% 6%;
+    --primary: 243 90% 68%;
+    --primary-foreground: 222 47% 5%;
 
-    --secondary: 160 15% 14%;
-    --secondary-foreground: 0 0% 90%;
+    --secondary: 222 30% 14%;
+    --secondary-foreground: 220 30% 92%;
 
-    --muted: 160 12% 16%;
-    --muted-foreground: 220 8% 55%;
+    --muted: 222 25% 14%;
+    --muted-foreground: 220 12% 62%;
 
-    --accent: 43 96% 50%;
-    --accent-foreground: 160 20% 6%;
+    --accent: 190 95% 55%;
+    --accent-foreground: 222 47% 5%;
 
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 0 72% 55%;
+    --destructive-foreground: 220 30% 96%;
 
-    --border: 160 12% 16%;
-    --input: 160 12% 16%;
-    --ring: 152 50% 45%;
+    --border: 222 25% 16%;
+    --input: 222 25% 16%;
+    --ring: 243 90% 68%;
 
-    --gradient-hero: linear-gradient(155deg, hsl(152, 50%, 22%) 0%, hsl(160, 55%, 12%) 100%);
-    --gradient-glass: linear-gradient(135deg, rgba(20,30,25,0.95) 0%, rgba(15,22,18,0.8) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(243 80% 32%) 0%, hsl(270 70% 28%) 50%, hsl(190 90% 28%) 100%);
+    --gradient-glass: linear-gradient(135deg, rgba(20,22,40,0.92) 0%, rgba(12,14,28,0.78) 100%);
 
-    --shadow-sm: 0 1px 3px hsl(0 0% 0% / 0.3), 0 1px 2px hsl(0 0% 0% / 0.2);
-    --shadow-md: 0 4px 6px -1px hsl(0 0% 0% / 0.3), 0 2px 4px -2px hsl(0 0% 0% / 0.2);
-    --shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.3), 0 4px 6px -4px hsl(0 0% 0% / 0.2);
+    --shadow-sm: 0 1px 3px hsl(0 0% 0% / 0.4), 0 1px 2px hsl(0 0% 0% / 0.25);
+    --shadow-md: 0 4px 8px -1px hsl(0 0% 0% / 0.35), 0 2px 4px -2px hsl(0 0% 0% / 0.25);
+    --shadow-lg: 0 10px 18px -3px hsl(0 0% 0% / 0.4), 0 4px 6px -4px hsl(0 0% 0% / 0.25);
+    --shadow-glow: 0 0 36px -6px hsl(243 90% 68% / 0.45);
 
-    --sidebar-background: 160 20% 6%;
-    --sidebar-foreground: 0 0% 95%;
-    --sidebar-primary: 152 50% 45%;
-    --sidebar-primary-foreground: 160 20% 6%;
-    --sidebar-accent: 160 15% 14%;
-    --sidebar-accent-foreground: 0 0% 90%;
-    --sidebar-border: 160 12% 16%;
-    --sidebar-ring: 152 50% 45%;
+    --sidebar-background: 222 47% 5%;
+    --sidebar-foreground: 220 30% 96%;
+    --sidebar-primary: 243 90% 68%;
+    --sidebar-primary-foreground: 222 47% 5%;
+    --sidebar-accent: 222 30% 14%;
+    --sidebar-accent-foreground: 220 30% 92%;
+    --sidebar-border: 222 25% 16%;
+    --sidebar-ring: 243 90% 68%;
   }
 }
 
