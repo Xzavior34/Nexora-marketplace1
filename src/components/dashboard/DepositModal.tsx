@@ -80,6 +80,17 @@ export default function DepositModal({ open, onClose }: DepositModalProps) {
             {loading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <ArrowDownLeft className="h-4 w-4 mr-2" />}
             Continue to payment
           </Button>
+
+          <div className="flex items-center justify-center gap-2 pt-2">
+            <span className="text-[10px] uppercase tracking-widest text-muted-foreground">Powered by</span>
+            <span className="text-sm font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              Squad
+            </span>
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
+            </span>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
