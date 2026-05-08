@@ -8,7 +8,11 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const SQUAD_BASE = "https://sandbox-api-d.squadco.com";
+// Toggle live vs sandbox via SQUAD_ENV secret ("live" | "sandbox"). Defaults to sandbox.
+const SQUAD_ENV = (Deno.env.get("SQUAD_ENV") || "sandbox").toLowerCase();
+const SQUAD_BASE = SQUAD_ENV === "live"
+  ? "https://api-d.squadco.com"
+  : "https://sandbox-api-d.squadco.com";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
