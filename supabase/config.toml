@@ -1,1 +1,4 @@
 project_id = "pejomqulglqfghoocgob"
+
+[functions.squad-webhook]
+verify_jwt = false
