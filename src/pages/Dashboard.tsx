@@ -20,6 +20,8 @@ import TransactionList from '@/components/dashboard/TransactionList';
 import ActiveGigs from '@/components/dashboard/ActiveGigs';
 import { DailyStreak } from '@/components/DailyStreak';
 import { TrustTierBadge } from '@/components/TrustTier';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
+import SmartMatchFeed from '@/components/SmartMatchFeed';
 
 export default function Dashboard() {
   const navigate = useNavigate();
