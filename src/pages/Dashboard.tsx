@@ -281,6 +281,8 @@ export default function Dashboard() {
 
         <DailyStreak />
 
+        {user?.id && <SmartMatchFeed userId={user.id} />}
+
         <ActiveGigs userId={user?.id || ''} />
         <section className="space-y-2"><h2 className="text-base font-semibold text-foreground">Saved gigs</h2><SavedGigs /></section>
 
@@ -299,6 +301,7 @@ export default function Dashboard() {
         <Button size="lg" className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg z-40 hidden md:flex" onClick={() => navigate('/post-gig')}>
           <Plus className="h-6 w-6" />
         </Button>
+        </ErrorBoundary>
       </main>
 
       <WithdrawModal open={showWithdraw} onClose={() => setShowWithdraw(false)} balance={profile.wallet_balance} profile={profile} onSuccess={refreshProfile} />
