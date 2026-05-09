@@ -368,3 +368,42 @@
     @apply border border-primary/20;
   }
 }
+
+/* === Deep Tech glassmorphism + AI glow === */
+@layer components {
+  .glass-card {
+    @apply bg-card/40 backdrop-blur-xl border border-white/10 rounded-2xl;
+    box-shadow: var(--shadow-lg), inset 0 1px 0 hsl(0 0% 100% / 0.05);
+  }
+  .glass-strong {
+    @apply bg-card/70 backdrop-blur-2xl border border-white/10 rounded-2xl;
+  }
+  .ai-glow {
+    box-shadow: 0 0 0 1px hsl(var(--primary) / 0.5), 0 0 24px hsl(var(--primary) / 0.45);
+  }
+}
+
+/* AI shimmer sweep — used by Match badge & Trust Score */
+@keyframes ai-shimmer {
+  0% { background-position: -150% 0; }
+  100% { background-position: 250% 0; }
+}
+.ai-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    hsl(var(--accent) / 0.35) 45%,
+    hsl(var(--primary) / 0.45) 55%,
+    transparent 100%
+  );
+  background-size: 250% 100%;
+  animation: ai-shimmer 2.6s linear infinite;
+}
+
+/* Pulse glow ring for AI badges */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 12px hsl(var(--primary) / 0.4), 0 0 0 0 hsl(var(--primary) / 0.0); }
+  50%      { box-shadow: 0 0 28px hsl(var(--primary) / 0.7), 0 0 0 8px hsl(var(--primary) / 0.0); }
+}
+.animate-pulse-glow { animation: pulse-glow 2.4s ease-in-out infinite; }
+
