@@ -430,6 +430,16 @@ export default function Profile() {
           </Card>
         </div>
 
+        {/* Squad Trust Score — alternative credit gauge */}
+        {user?.id && (
+          <TrustScoreGauge
+            userId={user.id}
+            completedGigs={(profile as any).completed_gigs || 0}
+            averageRating={averageRating}
+            isVerified={!!profile.is_verified}
+          />
+        )}
+
         {/* Profile Details */}
         <Card>
           <CardHeader>
