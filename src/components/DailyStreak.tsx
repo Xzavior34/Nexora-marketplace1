@@ -28,12 +28,21 @@ export function DailyStreak() {
   const [claimed, setClaimed] = useState<number[]>([]);
 
   useEffect(() => {
-    const last = localStorage.getItem(KEY_LAST);
-    const count = parseInt(localStorage.getItem(KEY_COUNT) || '0', 10) || 0;
-    if (last === todayISO()) { setStreak(count); setCheckedInToday(true); }
-    else if (last === yesterdayISO()) setStreak(count);
-    else setStreak(0);
-    setClaimed(readClaimed());
+    try {
+      const last = localStorage.getItem(KEY_LAST);
+      const raw = localStorage.getItem(KEY_COUNT);
+      const parsed = parseInt(raw || '0', 10);
+      const count = Number.isFinite(parsed) ? parsed : 0;
+      if (last === todayISO()) { setStreak(count); setCheckedInToday(true); }
+      else if (last === yesterdayISO()) setStreak(count);
+      else setStreak(0);
+      setClaimed(readClaimed());
+    } catch (e) {
+      console.warn('DailyStreak init failed; resetting state', e);
+      setStreak(0);
+      setCheckedInToday(false);
+      setClaimed([]);
+    }
   }, []);
 
   const checkIn = () => {
