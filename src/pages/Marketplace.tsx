@@ -276,7 +276,7 @@ export default function Marketplace() {
   const formatNaira = (kobo: number) => new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 0 }).format(kobo / 100);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-x-hidden w-full">
       <main className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 max-w-7xl">
         
         {/* Header */}
