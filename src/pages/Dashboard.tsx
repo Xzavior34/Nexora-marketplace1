@@ -218,7 +218,9 @@ export default function Dashboard() {
         </div>
       </header>
 
-      <main className="container max-w-4xl px-3 sm:px-4 py-3 sm:py-4 space-y-3 sm:space-y-4 pb-24">
+      <main className="container max-w-4xl px-3 sm:px-4 py-3 sm:py-4 space-y-3 sm:space-y-4 pb-24 overflow-x-hidden w-full">
+        <ErrorBoundary fallbackTitle="Dashboard hiccup">
+        
         
         {/* GAMIFICATION BANNER: Only shows if they haven't posted a gig yet */}
         {postedGigsCount === 0 && (
