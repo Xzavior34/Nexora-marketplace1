@@ -276,7 +276,7 @@ export default function Marketplace() {
   const formatNaira = (kobo: number) => new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 0 }).format(kobo / 100);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-x-hidden w-full">
       <main className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 max-w-7xl">
         
         {/* Header */}
@@ -355,7 +355,7 @@ export default function Marketplace() {
 
         {/* Products Grid */}
         {loading ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3 md:gap-4 -mx-3 sm:mx-0">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3 md:gap-4 w-full">
             {[...Array(10)].map((_, i) => <ProductCardSkeleton key={i} />)}
           </div>
         ) : filteredProducts.length === 0 ? (
@@ -366,7 +366,7 @@ export default function Marketplace() {
             {user && <Button onClick={() => navigate('/post-product')}><Plus className="h-4 w-4 mr-2" />Sell Something</Button>}
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3 md:gap-4 -mx-3 sm:mx-0">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3 md:gap-4 w-full">
             {filteredProducts.map((product) => (
               <Card 
                 key={product.id} 

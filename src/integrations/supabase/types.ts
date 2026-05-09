@@ -1447,6 +1447,25 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      get_smart_matches: {
+        Args: { _limit?: number; _user_id: string }
+        Returns: {
+          category: string
+          created_at: string
+          deadline: string
+          description: string
+          id: string
+          location: string
+          match_score: number
+          poster_avatar: string
+          poster_id: string
+          poster_name: string
+          poster_university: string
+          price_kobo: number
+          title: string
+        }[]
+      }
+      get_squad_trust_score: { Args: { _user_id: string }; Returns: number }
       get_user_email_internal: { Args: { p_user_id: string }; Returns: string }
       hire_and_escrow: {
         Args: {

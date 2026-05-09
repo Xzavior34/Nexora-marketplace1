@@ -20,6 +20,8 @@ import TransactionList from '@/components/dashboard/TransactionList';
 import ActiveGigs from '@/components/dashboard/ActiveGigs';
 import { DailyStreak } from '@/components/DailyStreak';
 import { TrustTierBadge } from '@/components/TrustTier';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
+import SmartMatchFeed from '@/components/SmartMatchFeed';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -216,7 +218,9 @@ export default function Dashboard() {
         </div>
       </header>
 
-      <main className="container max-w-4xl px-3 sm:px-4 py-3 sm:py-4 space-y-3 sm:space-y-4 pb-24">
+      <main className="container max-w-4xl px-3 sm:px-4 py-3 sm:py-4 space-y-3 sm:space-y-4 pb-24 overflow-x-hidden w-full">
+        <ErrorBoundary fallbackTitle="Dashboard hiccup">
+        
         
         {/* GAMIFICATION BANNER: Only shows if they haven't posted a gig yet */}
         {postedGigsCount === 0 && (
@@ -277,6 +281,8 @@ export default function Dashboard() {
 
         <DailyStreak />
 
+        {user?.id && <SmartMatchFeed userId={user.id} />}
+
         <ActiveGigs userId={user?.id || ''} />
         <section className="space-y-2"><h2 className="text-base font-semibold text-foreground">Saved gigs</h2><SavedGigs /></section>
 
@@ -295,6 +301,7 @@ export default function Dashboard() {
         <Button size="lg" className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg z-40 hidden md:flex" onClick={() => navigate('/post-gig')}>
           <Plus className="h-6 w-6" />
         </Button>
+        </ErrorBoundary>
       </main>
 
       <WithdrawModal open={showWithdraw} onClose={() => setShowWithdraw(false)} balance={profile.wallet_balance} profile={profile} onSuccess={refreshProfile} />

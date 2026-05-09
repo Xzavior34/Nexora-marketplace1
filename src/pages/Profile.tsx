@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { UserRating } from '@/components/UserRating';
 import { TrustTierBadge } from '@/components/TrustTier';
+import TrustScoreGauge from '@/components/TrustScoreGauge';
 import { toast } from 'sonner';
 import {
   ArrowLeft,
@@ -428,6 +429,16 @@ export default function Profile() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Squad Trust Score — alternative credit gauge */}
+        {user?.id && (
+          <TrustScoreGauge
+            userId={user.id}
+            completedGigs={(profile as any).completed_gigs || 0}
+            averageRating={averageRating}
+            isVerified={!!profile.is_verified}
+          />
+        )}
 
         {/* Profile Details */}
         <Card>
