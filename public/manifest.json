@@ -1,7 +1,7 @@
 {
-  "name": "UniGig",
-  "short_name": "UniGig",
-  "description": "University Student Freelance Marketplace. Post tasks, find gigs, earn money.",
+  "name": "Nexora",
+  "short_name": "Nexora",
+  "description": "Nigeria Freelance Marketplace. Post tasks, find gigs, earn money.",
   "start_url": "https://unigig.site/",
   "scope": "https://unigig.site/",
   "display": "standalone",

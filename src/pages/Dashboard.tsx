@@ -67,7 +67,7 @@ export default function Dashboard() {
       .single();
 
     if (updatedProfile && updatedProfile.university) {
-      // 2. Send to standard UniGigs Brevo list (List 7)
+      // 2. Send to standard Nexora Brevo list (List 7)
       supabase.functions.invoke('send-brevo-verification', {
         body: { 
           email: user.email, 

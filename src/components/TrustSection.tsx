@@ -4,7 +4,7 @@ const trustPoints = [
   {
     icon: BadgeCheck,
     title: "Verified Students",
-    description: "Join a trusted community of university students from around the world.",
+    description: "Join a trusted community of Nigerians from around the world.",
   },
   {
     icon: Lock,

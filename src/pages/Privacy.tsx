@@ -10,8 +10,8 @@ export default function Privacy() {
   return (
     <div className="min-h-screen bg-background">
       <SEOHead 
-        title="Privacy Policy | UniGig"
-        description="UniGig's Privacy Policy explains how we collect, use, and protect your personal information."
+        title="Privacy Policy | Nexora"
+        description="Nexora's Privacy Policy explains how we collect, use, and protect your personal information."
         canonical="https://unigig.site/privacy"
       />
 

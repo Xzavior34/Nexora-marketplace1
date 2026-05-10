@@ -10,9 +10,9 @@ interface SEOHeadProps {
 }
 
 export function SEOHead({
-  title = 'UniGig - Turn Your Skills Into Real Income',
-  description = 'The #1 trusted marketplace for university students. Post tasks, find gigs, earn money on campus, and get paid securely with instant payouts.',
-  keywords = 'UniGig, university freelance, student jobs, campus gigs, earn money college, student marketplace, freelance students, university tasks, student services, campus work, side hustle students',
+  title = 'Nexora - Turn Your Skills Into Real Income',
+  description = 'The #1 trusted marketplace for Nigerians. Post tasks, find gigs, earn money on campus, and get paid securely with instant payouts.',
+  keywords = 'Nexora, university freelance, student jobs, campus gigs, earn money college, Nigerian marketplace, freelance students, university tasks, student services, campus work, side hustle students',
   ogImage = 'https://unigig.site/og-image.png',
   ogType = 'website',
   canonical = 'https://unigig.site',

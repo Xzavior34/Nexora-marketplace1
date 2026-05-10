@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 const steps = [
   {
     icon: Sparkles,
-    title: 'Welcome to UniGig! 🎉',
+    title: 'Welcome to Nexora! 🎉',
     description: 'Your campus marketplace for gigs, products, and earnings. Let\'s show you around!',
     color: 'text-primary',
     bg: 'bg-primary/10',
@@ -25,7 +25,7 @@ const steps = [
   {
     icon: ShoppingBag,
     title: 'The Marketplace',
-    description: 'Buy and sell items directly using your UniGig wallet. No external payments needed!',
+    description: 'Buy and sell items directly using your Nexora wallet. No external payments needed!',
     color: 'text-green-500',
     bg: 'bg-green-500/10',
   },

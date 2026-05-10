@@ -57,8 +57,8 @@ const HeroSection = () => {
               <Briefcase className="h-6 w-6 text-primary-foreground" />
             </div>
             <div className="flex flex-col">
-              <span className="text-xl font-bold text-primary-foreground tracking-tight">UniGig</span>
-              <span className="text-[10px] text-primary-foreground/60 font-medium tracking-widest uppercase">Student Marketplace</span>
+              <span className="text-xl font-bold text-primary-foreground tracking-tight">Nexora</span>
+              <span className="text-[10px] text-primary-foreground/60 font-medium tracking-widest uppercase">Nigerian Marketplace</span>
             </div>
           </div>
           
@@ -166,7 +166,7 @@ const HeroSection = () => {
             className={`inline-flex items-center gap-2 rounded-full bg-primary-foreground/10 px-5 py-2.5 mb-8 backdrop-blur-md border border-primary-foreground/15 transition-all duration-700 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
           >
             <Sparkles className="h-4 w-4 text-gold animate-pulse" />
-            <span className="text-sm font-semibold text-primary-foreground/90">🌍 Open to All University Students Worldwide</span>
+            <span className="text-sm font-semibold text-primary-foreground/90">🌍 Open to All Nigerians Nationwide</span>
           </div>
           
           {/* Main Headline with staggered animation */}
@@ -187,7 +187,7 @@ const HeroSection = () => {
           <p 
             className={`text-lg md:text-xl lg:text-2xl text-primary-foreground/75 max-w-2xl mx-auto mb-12 leading-relaxed font-medium transition-all duration-700 delay-200 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
           >
-            The #1 marketplace where university students post tasks, find gigs, and get paid securely. 
+            The #1 marketplace where Nigerians post tasks, find gigs, and get paid securely. 
             <span className="text-gold font-semibold"> Instant payouts. Zero hassle.</span>
           </p>
 

@@ -68,7 +68,7 @@ export function Navbar() {
             <div className="w-8 h-8 bg-gradient-hero rounded-lg flex items-center justify-center">
               <span className="text-primary-foreground font-bold text-sm">UG</span>
             </div>
-            <span className="font-bold text-lg text-foreground hidden sm:block">UniGig</span>
+            <span className="font-bold text-lg text-foreground hidden sm:block">Nexora</span>
           </Link>
 
           {/* Desktop Navigation */}
