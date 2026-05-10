@@ -22,6 +22,8 @@ import { DailyStreak } from '@/components/DailyStreak';
 import { TrustTierBadge } from '@/components/TrustTier';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import SmartMatchFeed from '@/components/SmartMatchFeed';
+import VaultCard from '@/components/dashboard/VaultCard';
+import MicroLoanCard from '@/components/dashboard/MicroLoanCard';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -65,7 +67,7 @@ export default function Dashboard() {
       .single();
 
     if (updatedProfile && updatedProfile.university) {
-      // 2. Send to standard UniGigs Brevo list (List 7)
+      // 2. Send to standard Nexora Brevo list (List 7)
       supabase.functions.invoke('send-brevo-verification', {
         body: { 
           email: user.email, 
@@ -183,7 +185,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      <SEOHead title="Dashboard | UniGig" description="Manage your gigs and wallet" canonical="https://unigig.site/dashboard" />
+      <SEOHead title="Dashboard | Nexora" description="Manage your gigs, vault and wallet" canonical="https://unigig.site/dashboard" />
       
       {showOnboarding && <OnboardingTutorial onComplete={handleOnboardingComplete} />}
 
@@ -191,7 +193,7 @@ export default function Dashboard() {
         <div className="container max-w-4xl px-4 py-3 flex items-center justify-between gap-2">
           {/* NEW: Added flex and gap to align the name and the badge perfectly */}
           <div className="min-w-0 flex-1 flex items-center gap-2">
-            <h1 className="text-lg sm:text-xl font-bold text-foreground truncate">Hello, {profile.full_name?.split(' ')[0] || 'Student'}! 👋</h1>
+            <h1 className="text-lg sm:text-xl font-bold text-foreground truncate">Hello, {profile.full_name?.split(' ')[0] || 'there'}! 👋</h1>
             {/* VIP Ambassador Badge */}
             {(profile as any).is_ambassador && <AmbassadorBadge />}
             <TrustTierBadge
@@ -278,6 +280,23 @@ export default function Dashboard() {
             <CardContent className="p-3 text-center"><p className="text-xs text-muted-foreground">Done</p><p className="text-xl font-bold text-foreground">{stats.completed}</p></CardContent>
           </Card>
         </div>
+
+        {user?.id && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <VaultCard
+              userId={user.id}
+              vaultBalance={(profile as any).vault_balance ?? 0}
+              autoSavePercentage={(profile as any).auto_save_percentage ?? 5}
+              walletBalance={profile.wallet_balance}
+              onChanged={refreshProfile}
+            />
+            <MicroLoanCard
+              userId={user.id}
+              vaultBalance={(profile as any).vault_balance ?? 0}
+              onChanged={refreshProfile}
+            />
+          </div>
+        )}
 
         <DailyStreak />
 

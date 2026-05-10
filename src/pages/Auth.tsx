@@ -240,7 +240,7 @@ export default function Auth() {
   if (showEmailSent) {
     return (
       <>
-        <SEOHead title="Verify Your Email - UniGigs" description="Check your email to verify your UniGigs account." />
+        <SEOHead title="Verify Your Email - Nexora" description="Check your email to verify your Nexora account." />
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-secondary/30 to-background p-4">
           <Card className="w-full max-w-md shadow-lg">
             <CardContent className="pt-8 pb-8 text-center space-y-6">
@@ -263,8 +263,8 @@ export default function Auth() {
   return (
     <>
       <SEOHead 
-        title="Sign In - UniGigs | University Student Marketplace"
-        description="Sign in or create your UniGigs account to start earning money as a university student freelancer."
+        title="Sign In - Nexora | University Nigerian Marketplace"
+        description="Sign in or create your Nexora account to start earning money as a university student freelancer."
       />
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-secondary/30 to-background p-4">
         <div className="w-full max-w-md">
@@ -274,9 +274,9 @@ export default function Auth() {
               <div className="h-12 w-12 rounded-xl bg-gradient-hero flex items-center justify-center">
                 <GraduationCap className="h-7 w-7 text-primary-foreground" />
               </div>
-              <span className="text-2xl font-bold text-foreground">UniGigs</span>
+              <span className="text-2xl font-bold text-foreground">Nexora</span>
             </div>
-            <p className="text-muted-foreground">For University Students, By Students</p>
+            <p className="text-muted-foreground">For Nigerians, By Students</p>
           </div>
 
           <Card className="shadow-lg">

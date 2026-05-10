@@ -9,9 +9,9 @@ const Index = () => {
   return (
     <main className="min-h-screen">
       <SEOHead 
-        title="UniGigs - University Student Freelance Marketplace | Earn Money on Campus"
-        description="The #1 trusted marketplace for university students worldwide. Post tasks, find gigs, earn money on campus, and get paid securely with instant payouts. Join thousands of students earning today!"
-        keywords="university freelance, student jobs, campus gigs, earn money college, student marketplace, freelance students, university tasks, student services, campus work, side hustle students, unigigs, uni gigs"
+        title="Nexora - Nigeria Freelance Marketplace | Earn Money on Campus"
+        description="The #1 trusted marketplace for Nigerians worldwide. Post tasks, find gigs, earn money on campus, and get paid securely with instant payouts. Join thousands of students earning today!"
+        keywords="university freelance, student jobs, campus gigs, earn money college, Nigerian marketplace, freelance students, university tasks, student services, campus work, side hustle students, unigigs, uni gigs"
         ogType="website"
         canonical="https://unigigs.lovable.app"
       />

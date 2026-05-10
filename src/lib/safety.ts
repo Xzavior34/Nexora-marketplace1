@@ -76,7 +76,7 @@ export function checkMessageSafety(text: string): SafetyCheckResult {
   if (emailPattern.test(text)) {
     return {
       safe: false,
-      message: "Sharing email addresses is not allowed to protect both parties. Keep communication within UniGig.",
+      message: "Sharing email addresses is not allowed to protect both parties. Keep communication within Nexora.",
     };
   }
 
@@ -85,7 +85,7 @@ export function checkMessageSafety(text: string): SafetyCheckResult {
     if (normalizedText.includes(keyword)) {
       return {
         safe: false,
-        message: `Mentioning external platforms like "${keyword}" is not allowed. All transactions must stay on UniGig for your protection.`,
+        message: `Mentioning external platforms like "${keyword}" is not allowed. All transactions must stay on Nexora for your protection.`,
       };
     }
   }

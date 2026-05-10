@@ -109,7 +109,7 @@ export default function SpinToWin() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-primary/5 to-background pb-20">
       <SEOHead
-        title="Spin to Win! | UniGig Rewards"
+        title="Spin to Win! | Nexora Rewards"
         description="Hire a worker and stand a chance to win up to 10k Naira!"
       />
 
@@ -132,7 +132,7 @@ export default function SpinToWin() {
           <p className="text-muted-foreground text-lg max-w-md mx-auto">
             {MAINTENANCE_LOCK 
               ? "The Spin Wheel is currently undergoing maintenance. Check back soon!" 
-              : "Thanks for hiring on UniGig! Use your Spin Tickets below. Good luck!"}
+              : "Thanks for hiring on Nexora! Use your Spin Tickets below. Good luck!"}
           </p>
         </div>
 
@@ -189,7 +189,7 @@ export default function SpinToWin() {
               Instant Payout
             </h4>
             <p className="text-sm text-muted-foreground">
-              Winnings are automatically added to your UniGig wallet.
+              Winnings are automatically added to your Nexora wallet.
             </p>
           </div>
         </div>

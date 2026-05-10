@@ -10,8 +10,8 @@ export default function Terms() {
   return (
     <div className="min-h-screen bg-background">
       <SEOHead 
-        title="Terms of Service | UniGig"
-        description="Read UniGig's Terms of Service. Understand your responsibilities and our policies for using the platform."
+        title="Terms of Service | Nexora"
+        description="Read Nexora's Terms of Service. Understand your responsibilities and our policies for using the platform."
         canonical="https://unigig.site/terms"
       />
 
@@ -34,7 +34,7 @@ export default function Terms() {
             <section>
               <h2 className="text-xl font-semibold text-foreground">1. Acceptance of Terms</h2>
               <p className="text-muted-foreground leading-relaxed">
-                By accessing or using UniGig ("the Platform"), you agree to be bound by these Terms of Service. 
+                By accessing or using Nexora ("the Platform"), you agree to be bound by these Terms of Service. 
                 If you do not agree to these terms, please do not use our services.
               </p>
             </section>
@@ -57,11 +57,11 @@ export default function Terms() {
             <section>
               <h2 className="text-xl font-semibold text-foreground">3. Platform Role & Limitation of Liability</h2>
               <p className="text-muted-foreground leading-relaxed">
-                UniGig serves as a marketplace connecting students for gig-based work. We are <strong className="text-foreground">not</strong> a party 
+                Nexora serves as a marketplace connecting students for gig-based work. We are <strong className="text-foreground">not</strong> a party 
                 to any agreement between users. We do not guarantee the quality, safety, or legality of gigs posted.
               </p>
               <p className="text-muted-foreground leading-relaxed mt-3">
-                <strong className="text-foreground">UniGig shall not be held liable for:</strong>
+                <strong className="text-foreground">Nexora shall not be held liable for:</strong>
               </p>
               <ul className="list-disc pl-6 text-muted-foreground space-y-2">
                 <li>Any disputes between users</li>
@@ -82,7 +82,7 @@ export default function Terms() {
               <ul className="list-disc pl-6 text-muted-foreground space-y-2">
                 <li>Funds are released only after the task poster confirms completion</li>
                 <li>Disputes may delay fund release pending resolution</li>
-                <li>Refunds are at the discretion of UniGig based on dispute investigation</li>
+                <li>Refunds are at the discretion of Nexora based on dispute investigation</li>
               </ul>
             </section>
 
@@ -110,7 +110,7 @@ export default function Terms() {
             <section>
               <h2 className="text-xl font-semibold text-foreground">7. Dispute Resolution</h2>
               <p className="text-muted-foreground leading-relaxed">
-                Users are encouraged to resolve disputes directly. UniGig may, at its discretion, mediate disputes 
+                Users are encouraged to resolve disputes directly. Nexora may, at its discretion, mediate disputes 
                 but is not obligated to do so. Our decision in dispute cases is final.
               </p>
             </section>
@@ -118,7 +118,7 @@ export default function Terms() {
             <section>
               <h2 className="text-xl font-semibold text-foreground">8. Indemnification</h2>
               <p className="text-muted-foreground leading-relaxed">
-                You agree to indemnify and hold harmless UniGig, its owners, employees, and affiliates from any 
+                You agree to indemnify and hold harmless Nexora, its owners, employees, and affiliates from any 
                 claims, damages, losses, or expenses arising from your use of the platform or violation of these terms.
               </p>
             </section>
@@ -143,7 +143,7 @@ export default function Terms() {
 
             <div className="bg-muted/50 rounded-lg p-4 mt-8">
               <p className="text-sm text-muted-foreground text-center">
-                By using UniGig, you acknowledge that you have read, understood, and agree to be bound by these Terms of Service.
+                By using Nexora, you acknowledge that you have read, understood, and agree to be bound by these Terms of Service.
               </p>
             </div>
           </CardContent>

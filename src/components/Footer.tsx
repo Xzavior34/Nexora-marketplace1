@@ -45,8 +45,8 @@ const Footer = () => {
                 <Briefcase className="h-5 w-5 text-primary-foreground" />
               </div>
               <div>
-                <span className="text-xl font-bold block">UniGig</span>
-                <span className="text-xs text-background/50 font-medium">Student Marketplace</span>
+                <span className="text-xl font-bold block">Nexora</span>
+                <span className="text-xs text-background/50 font-medium">Nigerian Marketplace</span>
               </div>
             </div>
             <p className="text-background/60 text-sm leading-relaxed max-w-xs">
@@ -95,7 +95,7 @@ const Footer = () => {
 
         {/* Bottom Bar */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-background/50 py-8 border-t border-background/10">
-          <p>© 2025 UniGig. Made with ❤️ by Students, for Students.</p>
+          <p>© 2025 Nexora. Made with ❤️ by Students, for Students.</p>
           <p className="text-xs">Built in Nigeria 🇳🇬 • For the world 🌍</p>
         </div>
       </div>

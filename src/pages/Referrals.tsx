@@ -70,7 +70,7 @@ export default function Referrals() {
   const shareReferralLink = () => {
     const link = `https://unigig.site/auth?ref=${referralCode}`;
     if (navigator.share) {
-      navigator.share({ title: 'Join UniGig!', text: 'Sign up on UniGig and start earning!', url: link });
+      navigator.share({ title: 'Join Nexora!', text: 'Sign up on Nexora and start earning!', url: link });
     } else { copyReferralLink(); }
   };
 
@@ -212,7 +212,7 @@ export default function Referrals() {
               {[
                 { step: '1', title: 'Share Your Code', desc: 'Send your referral link to friends' },
                 { step: '2', title: 'They Sign Up', desc: 'Your friend creates an account using your code' },
-                { step: '3', title: 'You Hit 20 Referrals', desc: 'Get 20 friends to join UniGig' },
+                { step: '3', title: 'You Hit 20 Referrals', desc: 'Get 20 friends to join Nexora' },
                 { step: '4', title: '10 Complete Gigs', desc: 'When 10 of them finish gigs, you get ₦5,000!' },
               ].map((item) => (
                 <div key={item.step} className="flex items-start gap-4">

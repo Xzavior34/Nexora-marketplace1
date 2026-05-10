@@ -20,6 +20,8 @@ interface Profile {
   has_completed_onboarding: boolean;
   has_edited_referral: boolean | null;
   university: string | null;
+  vault_balance?: number;
+  auto_save_percentage?: number;
 }
 
 interface AuthContextType {
