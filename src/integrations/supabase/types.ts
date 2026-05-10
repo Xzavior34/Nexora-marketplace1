@@ -1165,6 +1165,7 @@ export type Database = {
           id: string
           paystack_reference: string
           status: string
+          transaction_status: string | null
           user_id: string
         }
         Insert: {
@@ -1173,6 +1174,7 @@ export type Database = {
           id?: string
           paystack_reference: string
           status?: string
+          transaction_status?: string | null
           user_id: string
         }
         Update: {
@@ -1181,6 +1183,7 @@ export type Database = {
           id?: string
           paystack_reference?: string
           status?: string
+          transaction_status?: string | null
           user_id?: string
         }
         Relationships: [
