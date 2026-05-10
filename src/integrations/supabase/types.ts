@@ -647,6 +647,7 @@ export type Database = {
         Row: {
           account_name: string | null
           account_number: string | null
+          auto_save_percentage: number
           avatar_url: string | null
           average_rating: number | null
           bank_name: string | null
@@ -674,6 +675,7 @@ export type Database = {
           spin_tickets: number | null
           university: string | null
           updated_at: string
+          vault_balance: number
           verification_code: string | null
           verification_expires_at: string | null
           wallet_balance: number
@@ -681,6 +683,7 @@ export type Database = {
         Insert: {
           account_name?: string | null
           account_number?: string | null
+          auto_save_percentage?: number
           avatar_url?: string | null
           average_rating?: number | null
           bank_name?: string | null
@@ -708,6 +711,7 @@ export type Database = {
           spin_tickets?: number | null
           university?: string | null
           updated_at?: string
+          vault_balance?: number
           verification_code?: string | null
           verification_expires_at?: string | null
           wallet_balance?: number
@@ -715,6 +719,7 @@ export type Database = {
         Update: {
           account_name?: string | null
           account_number?: string | null
+          auto_save_percentage?: number
           avatar_url?: string | null
           average_rating?: number | null
           bank_name?: string | null
@@ -742,6 +747,7 @@ export type Database = {
           spin_tickets?: number | null
           university?: string | null
           updated_at?: string
+          vault_balance?: number
           verification_code?: string | null
           verification_expires_at?: string | null
           wallet_balance?: number
@@ -1412,6 +1418,7 @@ export type Database = {
         Returns: {
           account_name: string | null
           account_number: string | null
+          auto_save_percentage: number
           avatar_url: string | null
           average_rating: number | null
           bank_name: string | null
@@ -1439,6 +1446,7 @@ export type Database = {
           spin_tickets: number | null
           university: string | null
           updated_at: string
+          vault_balance: number
           verification_code: string | null
           verification_expires_at: string | null
           wallet_balance: number
@@ -1534,6 +1542,7 @@ export type Database = {
         Args: { p_buyer_id: string; p_product_id: string }
         Returns: Json
       }
+      request_micro_loan: { Args: { p_amount_kobo: number }; Returns: Json }
       resolve_frozen_wallet_dispute: {
         Args: { p_dispute_id: string; p_resolution: string }
         Returns: undefined
@@ -1541,6 +1550,8 @@ export type Database = {
       secure_mark_disputed: { Args: { p_task_id: string }; Returns: undefined }
       secure_spin_wheel: { Args: { p_user_id: string }; Returns: Json }
       use_spin_ticket: { Args: { p_user_id: string }; Returns: boolean }
+      vault_deposit: { Args: { p_amount_kobo: number }; Returns: Json }
+      vault_withdraw: { Args: { p_amount_kobo: number }; Returns: Json }
     }
     Enums: {
       escrow_status: "pending" | "held" | "released" | "refunded" | "disputed"
