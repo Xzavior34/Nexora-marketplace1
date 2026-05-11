@@ -8,12 +8,12 @@ import { SEOHead } from "@/components/SEOHead";
 const Index = () => {
   return (
     <main className="min-h-screen">
-      <SEOHead 
-        title="Nexora - Nigeria Freelance Marketplace | Earn Money on Campus"
-        description="The #1 trusted marketplace for Nigerians worldwide. Post tasks, find gigs, earn money on campus, and get paid securely with instant payouts. Join thousands of students earning today!"
-        keywords="university freelance, student jobs, campus gigs, earn money college, Nigerian marketplace, freelance students, university tasks, student services, campus work, side hustle students, unigigs, uni gigs"
+      <SEOHead
+        title="Nexora — The Intelligent Freelance Economy"
+        description="Nigeria's intelligent freelance economy. AI-matched gigs, Squad Escrow security, and AjoSquad auto-savings for every Nigerian."
+        keywords="Nexora, Nigeria freelance, AI marketplace, Squad escrow, AjoSquad, fintech Nigeria, intelligent economy"
         ogType="website"
-        canonical="https://unigigs.lovable.app"
+        canonical="https://unigig.site"
       />
       <HeroSection />
       <HowItWorks />

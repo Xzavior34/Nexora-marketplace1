@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { Send, Loader2, MessageCircle, AlertTriangle, Paperclip, Image as ImageIcon, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { checkMessageSafety } from '@/lib/safety';
+import { ChatRiskMeter } from '@/components/chat/ChatRiskMeter';
 
 interface Message {
   id: string;
@@ -293,6 +294,9 @@ export function TaskChat({ taskId, posterId, participantId, applicationId = null
         </CardTitle>
       </CardHeader>
       <CardContent className="p-0">
+        <div className="px-4 pb-3">
+          <ChatRiskMeter messages={messages.map(m => ({ content: m.content, sender_id: m.sender_id }))} />
+        </div>
         <ScrollArea ref={scrollRef} className="h-64 px-4">
           {loading ? (
             <div className="flex items-center justify-center h-full">

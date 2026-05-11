@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { ArrowLeft, Loader2, MapPin, Calendar, Briefcase } from 'lucide-react';
+import { ArrowLeft, Loader2, MapPin, Calendar, Briefcase, Mic, Sparkles, Wand2 } from 'lucide-react';
 import { z } from 'zod';
 
 const CATEGORIES = [
@@ -44,7 +44,11 @@ export default function PostGig() {
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  
+  const [aiPrice, setAiPrice] = useState<{ price: number; reason: string } | null>(null);
+  const [aiLoading, setAiLoading] = useState<'price' | 'optimize' | 'voice' | null>(null);
+  const [voiceOpen, setVoiceOpen] = useState(false);
+  const [voiceTranscript, setVoiceTranscript] = useState('');
+
   const [form, setForm] = useState({
     title: '',
     description: '',
@@ -53,6 +57,47 @@ export default function PostGig() {
     location: '',
     deadline: '',
   });
+
+  const fetchSmartPrice = async () => {
+    if (!form.title || !form.category) { toast.error('Add a title and category first'); return; }
+    setAiLoading('price');
+    try {
+      const { data, error } = await supabase.functions.invoke('gig-ai', {
+        body: { action: 'price', payload: { title: form.title, category: form.category, location: form.location } },
+      });
+      if (error) throw error;
+      setAiPrice({ price: data.price_naira, reason: data.reason });
+      if (!form.price) setForm(f => ({ ...f, price: String(data.price_naira) }));
+    } catch { toast.error('AI pricing unavailable'); } finally { setAiLoading(null); }
+  };
+
+  const optimizeDescription = async () => {
+    if (!form.description) { toast.error('Write a rough description first'); return; }
+    setAiLoading('optimize');
+    try {
+      const { data, error } = await supabase.functions.invoke('gig-ai', {
+        body: { action: 'optimize', payload: { title: form.title, description: form.description } },
+      });
+      if (error) throw error;
+      setForm(f => ({ ...f, description: data.description }));
+      toast.success('Description professionalized ✨');
+    } catch { toast.error('AI optimizer unavailable'); } finally { setAiLoading(null); }
+  };
+
+  const parseVoice = async () => {
+    if (!voiceTranscript.trim()) { toast.error('Speak or type your gig first'); return; }
+    setAiLoading('voice');
+    try {
+      const { data, error } = await supabase.functions.invoke('gig-ai', {
+        body: { action: 'parse', payload: { transcript: voiceTranscript } },
+      });
+      if (error) throw error;
+      setForm(f => ({ ...f, title: data.title || f.title, description: data.description || f.description, category: data.category || f.category }));
+      setVoiceOpen(false);
+      setVoiceTranscript('');
+      toast.success('Voice gig captured 🎙️');
+    } catch { toast.error('AI voice parser unavailable'); } finally { setAiLoading(null); }
+  };
 
   // Redirect if not authenticated
   if (!authLoading && !user) {
@@ -167,89 +212,93 @@ export default function PostGig() {
             </CardDescription>
           </CardHeader>
           <CardContent>
+            {/* Voice-to-Gig */}
+            <div className="mb-6 p-4 rounded-xl border border-primary/30 bg-primary/5 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-glow animate-pulse-glow shrink-0">
+                  <Mic className="h-5 w-5 text-white" />
+                </div>
+                <div className="min-w-0">
+                  <p className="font-semibold text-sm">AI Voice Post</p>
+                  <p className="text-xs text-muted-foreground">Speak your gig — AI fills the form</p>
+                </div>
+              </div>
+              <Button type="button" size="sm" variant="outline" onClick={() => setVoiceOpen(v => !v)}>
+                {voiceOpen ? 'Close' : 'Try it'}
+              </Button>
+            </div>
+            {voiceOpen && (
+              <div className="mb-6 space-y-2">
+                <Textarea
+                  placeholder="🎙️ Speak or type naturally — e.g. 'I need someone to deliver food from Sabo to UI tomorrow morning, budget around 2k'"
+                  value={voiceTranscript}
+                  onChange={(e) => setVoiceTranscript(e.target.value)}
+                  rows={3}
+                />
+                <Button type="button" size="sm" onClick={parseVoice} disabled={aiLoading === 'voice'} className="w-full">
+                  {aiLoading === 'voice' ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Sparkles className="h-4 w-4 mr-2" />}
+                  Convert to Gig with AI
+                </Button>
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Title */}
               <div className="space-y-2">
                 <Label htmlFor="title">Title *</Label>
-                <Input
-                  id="title"
-                  placeholder="e.g., Need help with laundry"
-                  value={form.title}
-                  onChange={(e) => setForm({ ...form, title: e.target.value })}
-                />
+                <Input id="title" placeholder="e.g., Hire a developer to fix my site" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} />
                 {errors.title && <p className="text-sm text-destructive">{errors.title}</p>}
               </div>
 
-              {/* Category */}
               <div className="space-y-2">
                 <Label htmlFor="category">Category *</Label>
                 <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a category" />
-                  </SelectTrigger>
+                  <SelectTrigger><SelectValue placeholder="Select a category" /></SelectTrigger>
                   <SelectContent>
-                    {CATEGORIES.map((cat) => (
-                      <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                    ))}
+                    {CATEGORIES.map((cat) => (<SelectItem key={cat} value={cat}>{cat}</SelectItem>))}
                   </SelectContent>
                 </Select>
                 {errors.category && <p className="text-sm text-destructive">{errors.category}</p>}
               </div>
 
-              {/* Description */}
               <div className="space-y-2">
-                <Label htmlFor="description">Description *</Label>
-                <Textarea
-                  id="description"
-                  placeholder="Describe what you need done in detail..."
-                  value={form.description}
-                  onChange={(e) => setForm({ ...form, description: e.target.value })}
-                  rows={4}
-                />
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="description">Description *</Label>
+                  <Button type="button" size="sm" variant="ghost" onClick={optimizeDescription} disabled={aiLoading === 'optimize'} className="h-7 text-xs gap-1 text-primary">
+                    {aiLoading === 'optimize' ? <Loader2 className="h-3 w-3 animate-spin" /> : <Wand2 className="h-3 w-3" />}
+                    Professionalize
+                  </Button>
+                </div>
+                <Textarea id="description" placeholder="Describe what you need done..." value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={4} />
                 {errors.description && <p className="text-sm text-destructive">{errors.description}</p>}
               </div>
 
-              {/* Price */}
               <div className="space-y-2">
-                <Label htmlFor="price">Budget (₦) *</Label>
-                <Input
-                  id="price"
-                  type="number"
-                  placeholder="e.g., 2000"
-                  value={form.price}
-                  onChange={(e) => setForm({ ...form, price: e.target.value })}
-                  min={100}
-                />
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <Label htmlFor="price">Budget (₦) *</Label>
+                  <Button type="button" size="sm" variant="ghost" onClick={fetchSmartPrice} disabled={aiLoading === 'price'} className="h-7 text-xs gap-1 text-accent">
+                    {aiLoading === 'price' ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
+                    Nexora AI Suggestion
+                  </Button>
+                </div>
+                <Input id="price" type="number" placeholder="e.g., 5000" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} min={100} />
+                {aiPrice && (
+                  <div className="text-xs px-3 py-2 rounded-lg border border-accent/30 bg-accent/5 text-accent flex items-start gap-2">
+                    <Sparkles className="h-3 w-3 mt-0.5 shrink-0" />
+                    <span><b>AI suggests ₦{aiPrice.price.toLocaleString()}</b> — {aiPrice.reason}</span>
+                  </div>
+                )}
                 <p className="text-xs text-muted-foreground">20% platform fee will be deducted from the worker's pay</p>
                 {errors.price && <p className="text-sm text-destructive">{errors.price}</p>}
               </div>
 
-              {/* Location */}
               <div className="space-y-2">
-                <Label htmlFor="location" className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4" />
-                  Location (Optional)
-                </Label>
-                <Input
-                  id="location"
-                  placeholder="e.g., Hall 2, FUNAAB"
-                  value={form.location}
-                  onChange={(e) => setForm({ ...form, location: e.target.value })}
-                />
+                <Label htmlFor="location" className="flex items-center gap-2"><MapPin className="h-4 w-4" />Location (Optional)</Label>
+                <Input id="location" placeholder="e.g., Lagos, Ikeja" value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} />
               </div>
 
-              {/* Deadline */}
               <div className="space-y-2">
-                <Label htmlFor="deadline" className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  Deadline (Optional)
-                </Label>
-                <Input
-                  id="deadline"
-                  type="datetime-local"
-                  value={form.deadline}
-                  onChange={(e) => setForm({ ...form, deadline: e.target.value })}
-                />
+                <Label htmlFor="deadline" className="flex items-center gap-2"><Calendar className="h-4 w-4" />Deadline (Optional)</Label>
+                <Input id="deadline" type="datetime-local" value={form.deadline} onChange={(e) => setForm({ ...form, deadline: e.target.value })} />
               </div>
 
               {/* Submit */}

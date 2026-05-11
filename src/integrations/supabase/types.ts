@@ -1396,6 +1396,7 @@ export type Database = {
         Args: { p_amount_kobo: number; p_user_id: string }
         Returns: undefined
       }
+      bytea_to_text: { Args: { data: string }; Returns: string }
       cancel_and_refund_escrow: {
         Args: { p_task_id: string; p_user_id: string }
         Returns: Json
@@ -1487,6 +1488,132 @@ export type Database = {
         }
         Returns: Json
       }
+      http: {
+        Args: { request: Database["public"]["CompositeTypes"]["http_request"] }
+        Returns: Database["public"]["CompositeTypes"]["http_response"]
+        SetofOptions: {
+          from: "http_request"
+          to: "http_response"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      http_delete:
+        | {
+            Args: { uri: string }
+            Returns: Database["public"]["CompositeTypes"]["http_response"]
+            SetofOptions: {
+              from: "*"
+              to: "http_response"
+              isOneToOne: true
+              isSetofReturn: false
+            }
+          }
+        | {
+            Args: { content: string; content_type: string; uri: string }
+            Returns: Database["public"]["CompositeTypes"]["http_response"]
+            SetofOptions: {
+              from: "*"
+              to: "http_response"
+              isOneToOne: true
+              isSetofReturn: false
+            }
+          }
+      http_get:
+        | {
+            Args: { uri: string }
+            Returns: Database["public"]["CompositeTypes"]["http_response"]
+            SetofOptions: {
+              from: "*"
+              to: "http_response"
+              isOneToOne: true
+              isSetofReturn: false
+            }
+          }
+        | {
+            Args: { data: Json; uri: string }
+            Returns: Database["public"]["CompositeTypes"]["http_response"]
+            SetofOptions: {
+              from: "*"
+              to: "http_response"
+              isOneToOne: true
+              isSetofReturn: false
+            }
+          }
+      http_head: {
+        Args: { uri: string }
+        Returns: Database["public"]["CompositeTypes"]["http_response"]
+        SetofOptions: {
+          from: "*"
+          to: "http_response"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      http_header: {
+        Args: { field: string; value: string }
+        Returns: Database["public"]["CompositeTypes"]["http_header"]
+        SetofOptions: {
+          from: "*"
+          to: "http_header"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      http_list_curlopt: {
+        Args: never
+        Returns: {
+          curlopt: string
+          value: string
+        }[]
+      }
+      http_patch: {
+        Args: { content: string; content_type: string; uri: string }
+        Returns: Database["public"]["CompositeTypes"]["http_response"]
+        SetofOptions: {
+          from: "*"
+          to: "http_response"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      http_post:
+        | {
+            Args: { content: string; content_type: string; uri: string }
+            Returns: Database["public"]["CompositeTypes"]["http_response"]
+            SetofOptions: {
+              from: "*"
+              to: "http_response"
+              isOneToOne: true
+              isSetofReturn: false
+            }
+          }
+        | {
+            Args: { data: Json; uri: string }
+            Returns: Database["public"]["CompositeTypes"]["http_response"]
+            SetofOptions: {
+              from: "*"
+              to: "http_response"
+              isOneToOne: true
+              isSetofReturn: false
+            }
+          }
+      http_put: {
+        Args: { content: string; content_type: string; uri: string }
+        Returns: Database["public"]["CompositeTypes"]["http_response"]
+        SetofOptions: {
+          from: "*"
+          to: "http_response"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      http_reset_curlopt: { Args: never; Returns: boolean }
+      http_set_curlopt: {
+        Args: { curlopt: string; value: string }
+        Returns: boolean
+      }
+      instant_wallet_deposit: { Args: { p_amount_kobo: number }; Returns: Json }
       log_admin_action: {
         Args: {
           p_action: string
@@ -1549,6 +1676,21 @@ export type Database = {
       }
       secure_mark_disputed: { Args: { p_task_id: string }; Returns: undefined }
       secure_spin_wheel: { Args: { p_user_id: string }; Returns: Json }
+      text_to_bytea: { Args: { data: string }; Returns: string }
+      urlencode:
+        | { Args: { data: Json }; Returns: string }
+        | {
+            Args: { string: string }
+            Returns: {
+              error: true
+            } & "Could not choose the best candidate function between: public.urlencode(string => bytea), public.urlencode(string => varchar). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
+          }
+        | {
+            Args: { string: string }
+            Returns: {
+              error: true
+            } & "Could not choose the best candidate function between: public.urlencode(string => bytea), public.urlencode(string => varchar). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
+          }
       use_spin_ticket: { Args: { p_user_id: string }; Returns: boolean }
       vault_deposit: { Args: { p_amount_kobo: number }; Returns: Json }
       vault_withdraw: { Args: { p_amount_kobo: number }; Returns: Json }
@@ -1571,7 +1713,23 @@ export type Database = {
         | "refund"
     }
     CompositeTypes: {
-      [_ in never]: never
+      http_header: {
+        field: string | null
+        value: string | null
+      }
+      http_request: {
+        method: unknown
+        uri: string | null
+        headers: Database["public"]["CompositeTypes"]["http_header"][] | null
+        content_type: string | null
+        content: string | null
+      }
+      http_response: {
+        status: number | null
+        content_type: string | null
+        headers: Database["public"]["CompositeTypes"]["http_header"][] | null
+        content: string | null
+      }
     }
   }
 }

@@ -8,17 +8,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+
 import { toast } from 'sonner';
-import { Loader2, GraduationCap, Shield, Wallet, Mail } from 'lucide-react';
+import { Loader2, Sparkles, Shield, Wallet, Mail } from 'lucide-react';
 import { SEOHead } from '@/components/SEOHead';
-import { NIGERIAN_UNIVERSITIES, isFUNAABStudent } from '@/lib/nigerianUniversities';
 
 const emailSchema = z.string().email({ message: 'Please enter a valid email address' });
 
@@ -26,7 +19,6 @@ const signUpSchema = z.object({
   email: emailSchema,
   password: z.string().min(6, 'Password must be at least 6 characters'),
   fullName: z.string().min(2, 'Full name is required'),
-  university: z.string().min(1, 'Please select your university'),
   referralCode: z.string().optional(),
 });
 
@@ -48,7 +40,7 @@ export default function Auth() {
   const [resetEmail, setResetEmail] = useState('');
   const [resetSending, setResetSending] = useState(false);
   
-  const [signUpForm, setSignUpForm] = useState({ email: '', password: '', fullName: '', university: '', referralCode: '' });
+  const [signUpForm, setSignUpForm] = useState({ email: '', password: '', fullName: '', referralCode: '' });
   const [signInForm, setSignInForm] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -114,10 +106,7 @@ export default function Auth() {
         password: validated.password,
         options: {
           emailRedirectTo: `${window.location.origin}/dashboard`,
-          data: { 
-            full_name: validated.fullName,
-            university: validated.university,
-          },
+          data: { full_name: validated.fullName },
         },
       });
 
@@ -130,39 +119,23 @@ export default function Auth() {
         return;
       }
 
-      // ---------------------------------------------------------
-      // NEW REFERRAL LOGIC: Using RPC to bypass RLS restrictions
-      // ---------------------------------------------------------
       const refCode = validated.referralCode || searchParams.get('ref') || localStorage.getItem('unigig_pending_ref');
       if (refCode && data.user) {
-        const { error: rpcError } = await (supabase.rpc as any)('apply_referral_code', { 
-          new_user_id: data.user.id, 
-          ref_code: refCode 
+        const { error: rpcError } = await (supabase.rpc as any)('apply_referral_code', {
+          new_user_id: data.user.id,
+          ref_code: refCode,
         });
-        
-        if (rpcError) {
-          console.error("Referral failed to save:", rpcError);
-        } else {
-          console.log("Referral linked successfully!");
-          localStorage.removeItem('unigig_pending_ref'); // Clean up after successful link
-        }
+        if (!rpcError) localStorage.removeItem('unigig_pending_ref');
       }
-      // ---------------------------------------------------------
 
       if (data.user) {
         supabase.functions.invoke('send-brevo-verification', {
-          body: { email: validated.email, fullName: validated.fullName, listId: 7, university: validated.university },
+          body: { email: validated.email, fullName: validated.fullName, listId: 7 },
         }).catch(console.error);
-
-        if (isFUNAABStudent(validated.university)) {
-          supabase.functions.invoke('send-brevo-verification', {
-            body: { email: validated.email, fullName: validated.fullName, listId: 10, university: validated.university },
-          }).catch(console.error);
-        }
 
         setEmailSentTo(validated.email);
         setShowEmailSent(true);
-        toast.success("Account created! Please check your email.");
+        toast.success('Account created! Please check your email.');
       }
     } catch (err: any) {
       if (err instanceof z.ZodError) {
@@ -263,25 +236,23 @@ export default function Auth() {
   return (
     <>
       <SEOHead 
-        title="Sign In - Nexora | University Nigerian Marketplace"
-        description="Sign in or create your Nexora account to start earning money as a university student freelancer."
+        title="Sign In — Nexora | Intelligent Freelance Economy"
+        description="Sign in or create your Nexora account to access AI-matched gigs, Squad Escrow, and AjoSquad auto-savings."
       />
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-secondary/30 to-background p-4">
         <div className="w-full max-w-md">
-          {/* Logo */}
           <div className="text-center mb-8">
             <div className="inline-flex items-center gap-2 mb-4">
-              <div className="h-12 w-12 rounded-xl bg-gradient-hero flex items-center justify-center">
-                <GraduationCap className="h-7 w-7 text-primary-foreground" />
+              <div className="h-12 w-12 rounded-xl bg-gradient-hero flex items-center justify-center shadow-glow">
+                <span className="text-2xl font-extrabold text-white">N</span>
               </div>
               <span className="text-2xl font-bold text-foreground">Nexora</span>
             </div>
-            <p className="text-muted-foreground">For Nigerians, By Students</p>
+            <p className="text-muted-foreground">The Intelligent Freelance Economy</p>
           </div>
 
-          <Card className="shadow-lg">
+          <Card className="shadow-lg glass-strong">
             <CardContent className="pt-6">
-              {/* Google Sign-In */}
               <Button
                 variant="outline"
                 className="w-full h-12 mb-4 text-base gap-3"
@@ -343,21 +314,10 @@ export default function Auth() {
                       {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
                     </div>
                     <div className="space-y-2">
-                      <Label>University</Label>
-                      <Select value={signUpForm.university} onValueChange={(v) => setSignUpForm({ ...signUpForm, university: v })}>
-                        <SelectTrigger className="h-12 text-base"><SelectValue placeholder="Select your university" /></SelectTrigger>
-                        <SelectContent className="max-h-[300px]">
-                          {NIGERIAN_UNIVERSITIES.map((uni) => (<SelectItem key={uni} value={uni}>{uni}</SelectItem>))}
-                        </SelectContent>
-                      </Select>
-                      {errors.university && <p className="text-sm text-destructive">{errors.university}</p>}
-                    </div>
-                    <div className="space-y-2">
                       <Label>Password</Label>
                       <Input type="password" placeholder="••••••••" value={signUpForm.password} onChange={(e) => setSignUpForm({ ...signUpForm, password: e.target.value })} className="h-12 text-base" />
                       {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
                     </div>
-                    
                     <div className="space-y-2">
                       <Label>Referral Code (Optional)</Label>
                       <Input type="text" placeholder="e.g. JOHN2026" value={signUpForm.referralCode} onChange={(e) => setSignUpForm({ ...signUpForm, referralCode: e.target.value })} className="h-12 text-base" />
@@ -377,15 +337,15 @@ export default function Auth() {
           <div className="mt-8 grid grid-cols-3 gap-4 text-center">
             <div className="space-y-2">
               <div className="mx-auto h-10 w-10 rounded-full bg-secondary flex items-center justify-center">
-                <GraduationCap className="h-5 w-5 text-primary" />
+                <Sparkles className="h-5 w-5 text-primary" />
               </div>
-              <p className="text-xs text-muted-foreground">Students Worldwide</p>
+              <p className="text-xs text-muted-foreground">AI Smart Match</p>
             </div>
             <div className="space-y-2">
               <div className="mx-auto h-10 w-10 rounded-full bg-secondary flex items-center justify-center">
                 <Shield className="h-5 w-5 text-primary" />
               </div>
-              <p className="text-xs text-muted-foreground">Secure Escrow</p>
+              <p className="text-xs text-muted-foreground">Squad Escrow</p>
             </div>
             <div className="space-y-2">
               <div className="mx-auto h-10 w-10 rounded-full bg-secondary flex items-center justify-center">
@@ -399,3 +359,4 @@ export default function Auth() {
     </>
   );
 }
+
