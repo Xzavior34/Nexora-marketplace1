@@ -51,9 +51,9 @@
     --gold-glow: 180 100% 70%;
     --emerald: 260 90% 70%;       /* violet pop */
 
-    /* Deep Tech Gradients */
-    --gradient-hero: linear-gradient(135deg, hsl(222 60% 10%) 0%, hsl(210 90% 18%) 45%, hsl(185 100% 35%) 100%);
-    --gradient-gold: linear-gradient(135deg, hsl(185 100% 55%) 0%, hsl(210 100% 60%) 100%);
+    /* Deep Tech Gradients — brighter, premium fintech */
+    --gradient-hero: linear-gradient(135deg, hsl(238 80% 28%) 0%, hsl(220 95% 50%) 45%, hsl(185 100% 55%) 100%);
+    --gradient-gold: linear-gradient(135deg, hsl(185 100% 60%) 0%, hsl(210 100% 65%) 100%);
     --gradient-card: linear-gradient(180deg, hsl(222 42% 10%) 0%, hsl(222 38% 8%) 100%);
     --gradient-glass: linear-gradient(135deg, hsla(222, 42%, 12%, 0.72) 0%, hsla(222, 38%, 8%, 0.55) 100%);
     --gradient-mesh: radial-gradient(at 20% 10%, hsl(210 100% 50% / 0.18) 0px, transparent 50%),
