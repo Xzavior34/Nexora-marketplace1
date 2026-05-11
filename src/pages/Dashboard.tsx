@@ -53,42 +53,8 @@ export default function Dashboard() {
     }
   }, [user, profile]);
 
-  // Handle Onboarding Completion & Brevo Sync for Google Users
   const handleOnboardingComplete = async () => {
     setShowOnboarding(false);
-    
-    if (!user || !profile) return;
-
-    // 1. Fetch their updated profile to get the university they just selected
-    const { data: updatedProfile } = await supabase
-      .from('profiles')
-      .select('university')
-      .eq('id', user.id)
-      .single();
-
-    if (updatedProfile && updatedProfile.university) {
-      // 2. Send to standard Nexora Brevo list (List 7)
-      supabase.functions.invoke('send-brevo-verification', {
-        body: { 
-          email: user.email, 
-          fullName: profile.full_name, 
-          listId: 7, 
-          university: updatedProfile.university 
-        },
-      }).catch(console.error);
-
-      // 3. Send to FUNAAB specific list if applicable (List 10)
-      if (updatedProfile.university === 'Federal University of Agriculture, Abeokuta') {
-        supabase.functions.invoke('send-brevo-verification', {
-          body: { 
-            email: user.email, 
-            fullName: profile.full_name, 
-            listId: 10, 
-            university: updatedProfile.university 
-          },
-        }).catch(console.error);
-      }
-    }
   };
 
   // Process pending referrals silently in the background after Google Auth
@@ -185,7 +151,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      <SEOHead title="Dashboard | Nexora" description="Manage your gigs, vault and wallet" canonical="https://unigig.site/dashboard" />
+      <SEOHead title="Dashboard | Nexora" description="Manage your gigs, Vault and wallet — the Intelligent Freelance Economy" canonical="https://unigig.site/dashboard" />
       
       {showOnboarding && <OnboardingTutorial onComplete={handleOnboardingComplete} />}
 
