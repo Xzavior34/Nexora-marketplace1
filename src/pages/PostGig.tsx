@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { ArrowLeft, Loader2, MapPin, Calendar, Briefcase } from 'lucide-react';
+import { ArrowLeft, Loader2, MapPin, Calendar, Briefcase, Mic, Sparkles, Wand2 } from 'lucide-react';
 import { z } from 'zod';
 
 const CATEGORIES = [
@@ -44,7 +44,11 @@ export default function PostGig() {
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  
+  const [aiPrice, setAiPrice] = useState<{ price: number; reason: string } | null>(null);
+  const [aiLoading, setAiLoading] = useState<'price' | 'optimize' | 'voice' | null>(null);
+  const [voiceOpen, setVoiceOpen] = useState(false);
+  const [voiceTranscript, setVoiceTranscript] = useState('');
+
   const [form, setForm] = useState({
     title: '',
     description: '',
@@ -53,6 +57,47 @@ export default function PostGig() {
     location: '',
     deadline: '',
   });
+
+  const fetchSmartPrice = async () => {
+    if (!form.title || !form.category) { toast.error('Add a title and category first'); return; }
+    setAiLoading('price');
+    try {
+      const { data, error } = await supabase.functions.invoke('gig-ai', {
+        body: { action: 'price', payload: { title: form.title, category: form.category, location: form.location } },
+      });
+      if (error) throw error;
+      setAiPrice({ price: data.price_naira, reason: data.reason });
+      if (!form.price) setForm(f => ({ ...f, price: String(data.price_naira) }));
+    } catch { toast.error('AI pricing unavailable'); } finally { setAiLoading(null); }
+  };
+
+  const optimizeDescription = async () => {
+    if (!form.description) { toast.error('Write a rough description first'); return; }
+    setAiLoading('optimize');
+    try {
+      const { data, error } = await supabase.functions.invoke('gig-ai', {
+        body: { action: 'optimize', payload: { title: form.title, description: form.description } },
+      });
+      if (error) throw error;
+      setForm(f => ({ ...f, description: data.description }));
+      toast.success('Description professionalized ✨');
+    } catch { toast.error('AI optimizer unavailable'); } finally { setAiLoading(null); }
+  };
+
+  const parseVoice = async () => {
+    if (!voiceTranscript.trim()) { toast.error('Speak or type your gig first'); return; }
+    setAiLoading('voice');
+    try {
+      const { data, error } = await supabase.functions.invoke('gig-ai', {
+        body: { action: 'parse', payload: { transcript: voiceTranscript } },
+      });
+      if (error) throw error;
+      setForm(f => ({ ...f, title: data.title || f.title, description: data.description || f.description, category: data.category || f.category }));
+      setVoiceOpen(false);
+      setVoiceTranscript('');
+      toast.success('Voice gig captured 🎙️');
+    } catch { toast.error('AI voice parser unavailable'); } finally { setAiLoading(null); }
+  };
 
   // Redirect if not authenticated
   if (!authLoading && !user) {
