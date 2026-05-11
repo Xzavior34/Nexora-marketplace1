@@ -242,25 +242,23 @@ export default function Auth() {
   return (
     <>
       <SEOHead 
-        title="Sign In - Nexora | University Nigerian Marketplace"
-        description="Sign in or create your Nexora account to start earning money as a university student freelancer."
+        title="Sign In — Nexora | Intelligent Freelance Economy"
+        description="Sign in or create your Nexora account to access AI-matched gigs, Squad Escrow, and AjoSquad auto-savings."
       />
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-secondary/30 to-background p-4">
         <div className="w-full max-w-md">
-          {/* Logo */}
           <div className="text-center mb-8">
             <div className="inline-flex items-center gap-2 mb-4">
-              <div className="h-12 w-12 rounded-xl bg-gradient-hero flex items-center justify-center">
-                <GraduationCap className="h-7 w-7 text-primary-foreground" />
+              <div className="h-12 w-12 rounded-xl bg-gradient-hero flex items-center justify-center shadow-glow">
+                <span className="text-2xl font-extrabold text-white">N</span>
               </div>
               <span className="text-2xl font-bold text-foreground">Nexora</span>
             </div>
-            <p className="text-muted-foreground">For Nigerians, By Students</p>
+            <p className="text-muted-foreground">The Intelligent Freelance Economy</p>
           </div>
 
-          <Card className="shadow-lg">
+          <Card className="shadow-lg glass-strong">
             <CardContent className="pt-6">
-              {/* Google Sign-In */}
               <Button
                 variant="outline"
                 className="w-full h-12 mb-4 text-base gap-3"
@@ -322,21 +320,10 @@ export default function Auth() {
                       {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
                     </div>
                     <div className="space-y-2">
-                      <Label>University</Label>
-                      <Select value={signUpForm.university} onValueChange={(v) => setSignUpForm({ ...signUpForm, university: v })}>
-                        <SelectTrigger className="h-12 text-base"><SelectValue placeholder="Select your university" /></SelectTrigger>
-                        <SelectContent className="max-h-[300px]">
-                          {NIGERIAN_UNIVERSITIES.map((uni) => (<SelectItem key={uni} value={uni}>{uni}</SelectItem>))}
-                        </SelectContent>
-                      </Select>
-                      {errors.university && <p className="text-sm text-destructive">{errors.university}</p>}
-                    </div>
-                    <div className="space-y-2">
                       <Label>Password</Label>
                       <Input type="password" placeholder="••••••••" value={signUpForm.password} onChange={(e) => setSignUpForm({ ...signUpForm, password: e.target.value })} className="h-12 text-base" />
                       {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
                     </div>
-                    
                     <div className="space-y-2">
                       <Label>Referral Code (Optional)</Label>
                       <Input type="text" placeholder="e.g. JOHN2026" value={signUpForm.referralCode} onChange={(e) => setSignUpForm({ ...signUpForm, referralCode: e.target.value })} className="h-12 text-base" />
@@ -356,15 +343,15 @@ export default function Auth() {
           <div className="mt-8 grid grid-cols-3 gap-4 text-center">
             <div className="space-y-2">
               <div className="mx-auto h-10 w-10 rounded-full bg-secondary flex items-center justify-center">
-                <GraduationCap className="h-5 w-5 text-primary" />
+                <Sparkles className="h-5 w-5 text-primary" />
               </div>
-              <p className="text-xs text-muted-foreground">Students Worldwide</p>
+              <p className="text-xs text-muted-foreground">AI Smart Match</p>
             </div>
             <div className="space-y-2">
               <div className="mx-auto h-10 w-10 rounded-full bg-secondary flex items-center justify-center">
                 <Shield className="h-5 w-5 text-primary" />
               </div>
-              <p className="text-xs text-muted-foreground">Secure Escrow</p>
+              <p className="text-xs text-muted-foreground">Squad Escrow</p>
             </div>
             <div className="space-y-2">
               <div className="mx-auto h-10 w-10 rounded-full bg-secondary flex items-center justify-center">
@@ -378,3 +365,4 @@ export default function Auth() {
     </>
   );
 }
+
