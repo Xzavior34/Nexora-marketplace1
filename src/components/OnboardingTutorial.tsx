@@ -2,40 +2,38 @@ import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Briefcase, ShoppingBag, Gift, Sparkles, School, Loader2 } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { NIGERIAN_UNIVERSITIES } from '@/lib/nigerianUniversities';
+import { Briefcase, ShoppingBag, Sparkles, ShieldCheck, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 const steps = [
   {
     icon: Sparkles,
     title: 'Welcome to Nexora! 🎉',
-    description: 'Your campus marketplace for gigs, products, and earnings. Let\'s show you around!',
+    description: "The Intelligent Freelance Economy for every Nigerian. Let's give you a 30-second tour.",
     color: 'text-primary',
     bg: 'bg-primary/10',
   },
   {
     icon: Briefcase,
-    title: 'Post & Do Gigs',
-    description: 'Post tasks or apply for gigs. All payments are held securely in Escrow — no scams, guaranteed pay.',
-    color: 'text-blue-500',
-    bg: 'bg-blue-500/10',
+    title: 'AI Smart Match',
+    description: 'Our AI ranks gigs based on your skills, location and freshness. Stop scrolling, start earning.',
+    color: 'text-cyan-400',
+    bg: 'bg-cyan-500/10',
+  },
+  {
+    icon: ShieldCheck,
+    title: 'Squad Escrow Security',
+    description: 'Every Naira locked in escrow until work is delivered. Zero scams. Guaranteed payouts.',
+    color: 'text-emerald-400',
+    bg: 'bg-emerald-500/10',
   },
   {
     icon: ShoppingBag,
-    title: 'The Marketplace',
-    description: 'Buy and sell items directly using your Nexora wallet. No external payments needed!',
-    color: 'text-green-500',
-    bg: 'bg-green-500/10',
+    title: 'AjoSquad Auto-Savings',
+    description: 'Every payout auto-skims into your Vault, building a credit identity that unlocks micro-loans.',
+    color: 'text-violet-400',
+    bg: 'bg-violet-500/10',
   },
-  {
-    icon: School,
-    title: 'Select Your Campus',
-    description: 'Choose your university to see gigs and products near you.',
-    color: 'text-purple-500',
-    bg: 'bg-purple-500/10',
-  }
 ];
 
 interface Props {
@@ -45,55 +43,38 @@ interface Props {
 export function OnboardingTutorial({ onComplete }: Props) {
   const { user } = useAuth();
   const [currentStep, setCurrentStep] = useState(0);
-  const [selectedUni, setSelectedUni] = useState<string>('');
   const [loading, setLoading] = useState(false);
 
   const handleFinish = async () => {
     if (!user) return;
-    
-    // Validate university selection on the last step
-    if (currentStep === steps.length - 1 && !selectedUni) {
-      toast.error("Please select your university to continue");
-      return;
-    }
-
     setLoading(true);
     try {
       const { error } = await supabase
         .from('profiles')
-        .update({ 
-          has_completed_onboarding: true,
-          university: selectedUni || null // Save the uni they picked
-        } as any)
+        .update({ has_completed_onboarding: true } as any)
         .eq('id', user.id);
-
       if (error) throw error;
       onComplete();
-    } catch (err) {
-      toast.error("Failed to save profile");
+    } catch {
+      toast.error('Failed to save profile');
     } finally {
       setLoading(false);
     }
   };
 
   const handleNext = () => {
-    if (currentStep < steps.length - 1) {
-      setCurrentStep(currentStep + 1);
-    } else {
-      handleFinish();
-    }
+    if (currentStep < steps.length - 1) setCurrentStep(currentStep + 1);
+    else handleFinish();
   };
 
-  const handleBack = () => {
-    if (currentStep > 0) setCurrentStep(currentStep - 1);
-  };
+  const handleBack = () => { if (currentStep > 0) setCurrentStep(currentStep - 1); };
 
   const step = steps[currentStep];
   const Icon = step.icon;
 
   return (
-    <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-background rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
+    <div className="fixed inset-0 z-[100] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="glass-strong rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
         <div className="p-8 text-center space-y-6">
           <div className={`mx-auto h-20 w-20 rounded-2xl ${step.bg} flex items-center justify-center transition-all duration-300`}>
             <Icon className={`h-10 w-10 ${step.color}`} />
@@ -102,23 +83,6 @@ export function OnboardingTutorial({ onComplete }: Props) {
             <h2 className="text-2xl font-bold text-foreground">{step.title}</h2>
             <p className="text-muted-foreground leading-relaxed">{step.description}</p>
           </div>
-
-          {/* University Selector showing ONLY on the last step */}
-          {currentStep === steps.length - 1 && (
-            <div className="pt-4 text-left">
-              <Select onValueChange={setSelectedUni} value={selectedUni}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Search your University..." />
-                </SelectTrigger>
-                {/* FIX: Added z-[200] so it pops UP over the modal, and max-h so it scrolls properly */}
-                <SelectContent className="z-[200] max-h-[250px]">
-                  {NIGERIAN_UNIVERSITIES.map((uni) => (
-                    <SelectItem key={uni} value={uni}>{uni}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
         </div>
 
         <div className="flex justify-center gap-2 pb-4">
@@ -128,11 +92,7 @@ export function OnboardingTutorial({ onComplete }: Props) {
         </div>
 
         <div className="p-6 pt-2 flex items-center justify-between gap-3">
-          {/* We hide SKIP on the last step because we NEED the university data */}
-          {currentStep < steps.length - 1 ? (
-            <Button variant="ghost" size="sm" onClick={() => setCurrentStep(steps.length - 1)} className="text-muted-foreground">Skip</Button>
-          ) : <div />}
-          
+          <Button variant="ghost" size="sm" onClick={handleFinish} className="text-muted-foreground" disabled={loading}>Skip</Button>
           <div className="flex gap-2">
             {currentStep > 0 && <Button variant="outline" onClick={handleBack} disabled={loading}>Back</Button>}
             <Button onClick={handleNext} disabled={loading}>
