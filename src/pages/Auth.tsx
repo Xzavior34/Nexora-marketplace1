@@ -16,9 +16,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { Loader2, GraduationCap, Shield, Wallet, Mail } from 'lucide-react';
+import { Loader2, Sparkles, Shield, Wallet, Mail } from 'lucide-react';
 import { SEOHead } from '@/components/SEOHead';
-import { NIGERIAN_UNIVERSITIES, isFUNAABStudent } from '@/lib/nigerianUniversities';
 
 const emailSchema = z.string().email({ message: 'Please enter a valid email address' });
 
@@ -26,7 +25,6 @@ const signUpSchema = z.object({
   email: emailSchema,
   password: z.string().min(6, 'Password must be at least 6 characters'),
   fullName: z.string().min(2, 'Full name is required'),
-  university: z.string().min(1, 'Please select your university'),
   referralCode: z.string().optional(),
 });
 
@@ -48,7 +46,7 @@ export default function Auth() {
   const [resetEmail, setResetEmail] = useState('');
   const [resetSending, setResetSending] = useState(false);
   
-  const [signUpForm, setSignUpForm] = useState({ email: '', password: '', fullName: '', university: '', referralCode: '' });
+  const [signUpForm, setSignUpForm] = useState({ email: '', password: '', fullName: '', referralCode: '' });
   const [signInForm, setSignInForm] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -114,10 +112,7 @@ export default function Auth() {
         password: validated.password,
         options: {
           emailRedirectTo: `${window.location.origin}/dashboard`,
-          data: { 
-            full_name: validated.fullName,
-            university: validated.university,
-          },
+          data: { full_name: validated.fullName },
         },
       });
 
@@ -130,39 +125,23 @@ export default function Auth() {
         return;
       }
 
-      // ---------------------------------------------------------
-      // NEW REFERRAL LOGIC: Using RPC to bypass RLS restrictions
-      // ---------------------------------------------------------
       const refCode = validated.referralCode || searchParams.get('ref') || localStorage.getItem('unigig_pending_ref');
       if (refCode && data.user) {
-        const { error: rpcError } = await (supabase.rpc as any)('apply_referral_code', { 
-          new_user_id: data.user.id, 
-          ref_code: refCode 
+        const { error: rpcError } = await (supabase.rpc as any)('apply_referral_code', {
+          new_user_id: data.user.id,
+          ref_code: refCode,
         });
-        
-        if (rpcError) {
-          console.error("Referral failed to save:", rpcError);
-        } else {
-          console.log("Referral linked successfully!");
-          localStorage.removeItem('unigig_pending_ref'); // Clean up after successful link
-        }
+        if (!rpcError) localStorage.removeItem('unigig_pending_ref');
       }
-      // ---------------------------------------------------------
 
       if (data.user) {
         supabase.functions.invoke('send-brevo-verification', {
-          body: { email: validated.email, fullName: validated.fullName, listId: 7, university: validated.university },
+          body: { email: validated.email, fullName: validated.fullName, listId: 7 },
         }).catch(console.error);
-
-        if (isFUNAABStudent(validated.university)) {
-          supabase.functions.invoke('send-brevo-verification', {
-            body: { email: validated.email, fullName: validated.fullName, listId: 10, university: validated.university },
-          }).catch(console.error);
-        }
 
         setEmailSentTo(validated.email);
         setShowEmailSent(true);
-        toast.success("Account created! Please check your email.");
+        toast.success('Account created! Please check your email.');
       }
     } catch (err: any) {
       if (err instanceof z.ZodError) {
