@@ -28,7 +28,7 @@ const Footer = () => {
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-background/10 text-background/80 text-sm font-medium mb-6 backdrop-blur-sm border border-background/10">
             <Sparkles className="h-4 w-4 text-amber-400" />
-            Join 2,400+ Students Already Earning
+            Join 2,400+ Verified Professionals Already Earning
           </div>
           <h2 className="text-3xl md:text-5xl font-bold mb-6 text-balance max-w-2xl mx-auto leading-tight">
             Ready to Turn Your Skills<br className="hidden md:block" /> into Real Income?
@@ -66,7 +66,7 @@ const Footer = () => {
               </div>
             </div>
             <p className="text-background/60 text-sm leading-relaxed max-w-xs">
-              Nigeria's intelligent freelance marketplace — open to every student and artisan nationwide.
+              Nigeria's National Economic Opportunity Platform — open to every professional, artisan, trader, and ambitious talent across the country.
             </p>
           </div>
 
@@ -109,7 +109,7 @@ const Footer = () => {
 
         {/* Bottom bar */}
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-background/40 py-8 border-t border-background/10">
-          <p>© 2025 Nexora. Made with ❤️ for every Nigerian hustler.</p>
+          <p>© 2025 Nexora. Powering Nigeria's National Gig Economy.</p>
           <p className="text-xs">Built in Nigeria 🇳🇬 • For the world 🌍</p>
         </div>
       </div>

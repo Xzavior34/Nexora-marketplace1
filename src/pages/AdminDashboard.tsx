@@ -385,7 +385,7 @@ const handleDeleteUser = async (targetId: string, email: string) => {
     setProcessing(`bulk_${type}`);
     try {
       if (type === 'gigs') {
-        const mockTitles = ["Logo Design", "Data Entry", "Math Tutoring", "Campus Flyer Distribution", "Proofreading Essay", "Video Editing", "Social Media Management"];
+        const mockTitles = ["Logo Design", "Data Entry", "Electrical Repairs", "Nationwide Flyer Distribution", "Proofreading & Editing", "Video Editing", "Social Media Management"];
         const bulkGigs: any[] = Array.from({ length: 10 }).map(() => ({
           id: crypto.randomUUID(),
           title: mockTitles[Math.floor(Math.random() * mockTitles.length)],
@@ -693,8 +693,8 @@ const handleDeleteUser = async (targetId: string, email: string) => {
               <Input placeholder="e.g. fake@unigig.site" value={newFakeUser.email} onChange={e => setNewFakeUser({...newFakeUser, email: e.target.value})} />
             </div>
             <div className="space-y-2">
-              <label className="text-xs font-bold uppercase">University</label>
-              <Input placeholder="e.g. FUNAAB" value={newFakeUser.university} onChange={e => setNewFakeUser({...newFakeUser, university: e.target.value})} />
+              <label className="text-xs font-bold uppercase">Region / State</label>
+              <Input placeholder="e.g. Lagos, Abuja, Ogun..." value={newFakeUser.university} onChange={e => setNewFakeUser({...newFakeUser, university: e.target.value})} />
             </div>
             {/* Auto-Boost Checkbox */}
             <div className="flex items-center space-x-2 pt-2">

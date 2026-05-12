@@ -342,7 +342,7 @@ export default function PostProduct() {
                     id="shipping_info"
                     value={form.shipping_info}
                     onChange={(e) => setForm({ ...form, shipping_info: e.target.value })}
-                    placeholder="Delivery within FUNAAB campus, pickup available..."
+                    placeholder="e.g. Nationwide delivery available, Lagos pickup only..."
                     rows={2}
                   />
                 </div>

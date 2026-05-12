@@ -177,7 +177,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      <SEOHead title="Dashboard | Nexora" description="Manage your gigs, Vault and wallet — the Intelligent Freelance Economy" canonical="https://unigig.site/dashboard" />
+      <SEOHead title="Dashboard | Nexora" description="Manage your gigs, Ajo Vault, and wallet on Nigeria's National Economic Opportunity Platform" canonical="https://unigig.site/dashboard" />
 
       {showOnboarding && <OnboardingTutorial onComplete={() => setShowOnboarding(false)} />}
 

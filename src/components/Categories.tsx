@@ -46,10 +46,10 @@ const Categories = () => {
             Marketplace Categories
           </span>
           <h2 className="text-3xl md:text-5xl font-extrabold text-foreground mb-4 tracking-tight">
-            Find Your Hustle
+            Verified Professional Services
           </h2>
           <p className="text-muted-foreground max-w-xl mx-auto text-lg leading-relaxed">
-            From expert web developers to reliable local artisans — the right skill is always one match away.
+            From elite web developers to skilled local artisans — Nigeria's deepest pool of verified economic talent, one AI match away.
           </p>
         </motion.div>
 

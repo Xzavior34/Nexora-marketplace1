@@ -172,17 +172,17 @@ const HeroSection = () => {
           <motion.div className="text-left" variants={container} initial="hidden" animate="visible">
             <motion.div variants={item} className="inline-flex items-center gap-2 rounded-full bg-brand/10 px-4 py-2 mb-6 border border-brand/20">
               <Sparkles className="h-4 w-4 text-brand" />
-              <span className="text-sm font-semibold text-brand">Built for every Nigerian student freelancer</span>
+              <span className="text-sm font-semibold text-brand">Nigeria's National Economic Opportunity Platform</span>
             </motion.div>
 
             <motion.h1 variants={item} className="text-4xl md:text-5xl lg:text-[68px] font-extrabold tracking-tight text-foreground leading-[1.08] mb-6">
-              Nigeria's Most<br />
-              <span className="text-gradient-primary">Intelligent</span><br />
-              Freelance Economy.
+              Nigeria's National<br />
+              <span className="text-gradient-primary">Economic</span><br />
+              Opportunity Platform.
             </motion.h1>
 
             <motion.p variants={item} className="text-lg md:text-xl text-muted-foreground mb-8 leading-relaxed font-medium max-w-xl">
-              From FUNAAB to every campus. Turn your skills into real income — AI-matched gigs, Squad-secured escrow, and an Ajo Vault that builds your financial future.
+              From Lagos to Kano — every Nigerian professional, artisan, and ambitious young talent deserves access to verified economic opportunity. AI-matched, Squad-secured, and Ajo-powered.
             </motion.p>
 
             <motion.div variants={item} className="flex flex-col sm:flex-row items-center gap-4 mb-12">
@@ -209,7 +209,7 @@ const HeroSection = () => {
             {/* Social proof counters */}
             <motion.div variants={item} className="mt-10 grid grid-cols-3 gap-4 border-t border-border pt-8">
               {[
-                { value: 2400, label: 'Active Students', suffix: '+' },
+                { value: 2400, label: 'Active Professionals', suffix: '+' },
                 { value: 8900, label: 'Gigs Matched',    suffix: '+' },
                 { value: 12,   label: 'M₦ in Escrow',   suffix: 'M+' },
               ].map(stat => (

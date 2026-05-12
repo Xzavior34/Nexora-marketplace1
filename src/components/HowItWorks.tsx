@@ -9,7 +9,7 @@ const steps = [
     step: '01',
     title: "Smart Match AI",
     description:
-      "Our AI analyses your skills, university, and history to surface the highest-value gigs in seconds — ranked by compatibility, not recency.",
+      "Our AI analyses your skills, location, and professional history to surface the highest-value gigs in seconds — ranked by economic compatibility, not recency.",
     gradient: "from-violet-600 to-indigo-500",
     glow: "shadow-[0_8px_32px_-4px_rgba(99,91,255,0.4)]",
   },
@@ -68,7 +68,7 @@ const HowItWorks = () => {
             Three pillars. One intelligent economy.
           </h2>
           <p className="text-muted-foreground max-w-xl mx-auto text-lg leading-relaxed">
-            AI matching. Bank-grade escrow. Automatic savings. Purpose-built for every Nigerian hustler.
+            AI matching. Bank-grade escrow. Peer-to-peer Ajo savings. Purpose-built for Nigeria's national gig economy.
           </p>
         </motion.div>
 

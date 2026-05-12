@@ -72,7 +72,7 @@ export default function Gigs() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All Categories');
-  const [selectedUniversity, setSelectedUniversity] = useState('All Universities');
+  const [selectedUniversity, setSelectedUniversity] = useState('All Regions');
   const [applying, setApplying] = useState<string | null>(null);
   const [appliedGigIds, setAppliedGigIds] = useState<Set<string>>(new Set());
 
@@ -115,7 +115,7 @@ export default function Gigs() {
 
     if (!error && data) {
       let filteredData = data as Task[];
-      if (selectedUniversity !== 'All Universities') {
+      if (selectedUniversity !== 'All Regions') {
         filteredData = filteredData.filter(task => 
           task.poster?.university === selectedUniversity
         );
@@ -362,13 +362,13 @@ export default function Gigs() {
           </div>
           
           <div className="flex items-center gap-2">
-            <GraduationCap className="h-4 w-4 text-muted-foreground shrink-0" />
+            <MapPin className="h-4 w-4 text-muted-foreground shrink-0" />
             <Select value={selectedUniversity} onValueChange={setSelectedUniversity}>
               <SelectTrigger className="w-[200px]">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="max-h-[300px]">
-                <SelectItem value="All Universities">All Universities</SelectItem>
+                <SelectItem value="All Regions">All Regions</SelectItem>
                 {NIGERIAN_UNIVERSITIES.map((uni) => (
                   <SelectItem key={uni} value={uni}>{uni}</SelectItem>
                 ))}
