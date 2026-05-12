@@ -14,6 +14,7 @@ import { format, formatDistanceToNow } from 'date-fns';
 import { useUserOnlineStatus } from '@/hooks/useUserOnlineStatus';
 import { AvatarWithStatus } from '@/components/OnlineIndicator';
 import { checkMessageSafety } from '@/lib/safety';
+import { ChatRiskMeter } from '@/components/chat/ChatRiskMeter';
 import { toast } from 'sonner';
 
 interface Conversation {
@@ -506,6 +507,12 @@ export default function Messages() {
                     <p className="text-sm text-muted-foreground truncate">{selectedConversation.task_title}</p>
                   </div>
                 </div>
+
+                {messages.length > 0 && (
+                  <div className="px-4 pt-3">
+                    <ChatRiskMeter messages={messages.map(m => ({ content: m.content, sender_id: m.sender_id }))} />
+                  </div>
+                )}
 
                 <ScrollArea className="flex-1 p-4">
                   {messagesLoading ? (

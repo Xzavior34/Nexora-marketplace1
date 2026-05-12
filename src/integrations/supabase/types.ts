@@ -1352,6 +1352,10 @@ export type Database = {
       add_spin_ticket: { Args: { p_user_id: string }; Returns: undefined }
       admin_delete_user: { Args: { p_user_id: string }; Returns: Json }
       admin_get_monitoring_stats: { Args: never; Returns: Json }
+      admin_process_withdrawal: {
+        Args: { p_action: string; p_request_id: string }
+        Returns: Json
+      }
       admin_reward_user: {
         Args: { reward_amount: number; target_user_id: string }
         Returns: Json
@@ -1613,7 +1617,24 @@ export type Database = {
         Args: { curlopt: string; value: string }
         Returns: boolean
       }
+      initiate_manual_withdrawal: {
+        Args: {
+          p_account_name: string
+          p_account_number: string
+          p_amount_kobo: number
+          p_bank_name: string
+        }
+        Returns: Json
+      }
       instant_wallet_deposit: { Args: { p_amount_kobo: number }; Returns: Json }
+      live_dispute_escrow: {
+        Args: { p_escrow_id: string; p_reason: string }
+        Returns: Json
+      }
+      live_hire_and_lock_escrow: {
+        Args: { p_amount_kobo: number; p_gig_id: string; p_worker_id: string }
+        Returns: Json
+      }
       log_admin_action: {
         Args: {
           p_action: string
@@ -1676,6 +1697,7 @@ export type Database = {
       }
       secure_mark_disputed: { Args: { p_task_id: string }; Returns: undefined }
       secure_spin_wheel: { Args: { p_user_id: string }; Returns: Json }
+      submit_live_verification: { Args: { p_nin_bvn: string }; Returns: Json }
       text_to_bytea: { Args: { data: string }; Returns: string }
       urlencode:
         | { Args: { data: Json }; Returns: string }

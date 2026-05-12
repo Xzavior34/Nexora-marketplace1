@@ -369,6 +369,54 @@
   }
 }
 
+/* === Stripe-tier Fintech Tokens (overlay on Obsidian theme) === */
+@layer components {
+  .pill-badge {
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium tracking-tight;
+    @apply border border-white/10 bg-white/5 backdrop-blur-sm;
+  }
+  .pill-badge-success { @apply bg-emerald-500/10 text-emerald-300 border-emerald-500/30; }
+  .pill-badge-warn    { @apply bg-amber-500/10 text-amber-300 border-amber-500/30; }
+  .pill-badge-danger  { @apply bg-red-500/10 text-red-300 border-red-500/30; }
+  .pill-badge-brand   { @apply bg-primary/12 text-primary border-primary/30; }
+  .pill-badge-cyan    { @apply bg-accent/12 text-accent border-accent/30; }
+
+  .stripe-card {
+    @apply rounded-2xl border border-white/10 bg-card/60 backdrop-blur-xl;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25), inset 0 1px 0 hsl(0 0% 100% / 0.04);
+  }
+
+  .micro-border {
+    @apply border border-white/8;
+  }
+
+  .stripe-amount {
+    @apply font-semibold tracking-tight tabular-nums;
+    font-feature-settings: "tnum", "cv02";
+  }
+
+  .stripe-label {
+    @apply text-[10px] uppercase tracking-[0.12em] font-medium text-muted-foreground;
+  }
+
+  .mesh-bg {
+    position: relative;
+    isolation: isolate;
+  }
+  .mesh-bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(40% 60% at 18% 20%, hsl(243 100% 67% / 0.22) 0%, transparent 60%),
+      radial-gradient(35% 55% at 82% 30%, hsl(189 100% 50% / 0.18) 0%, transparent 60%),
+      radial-gradient(50% 60% at 50% 90%, hsl(312 100% 75% / 0.16) 0%, transparent 60%);
+    filter: blur(40px);
+  }
+}
+
 /* === Deep Tech glassmorphism + AI glow === */
 @layer components {
   .glass-card {

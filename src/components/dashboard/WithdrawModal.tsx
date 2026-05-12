@@ -162,11 +162,12 @@ export default function WithdrawModal({ open, onClose, balance, profile, onSucce
         throw new Error('Failed to save bank details');
       }
 
-      // RESTORED: Automatic Paystack withdrawal
-      const { data, error } = await supabase.functions.invoke('paystack-withdraw', {
-        body: {
-          amount_kobo: parseFloat(withdrawAmount) * 100,
-        },
+      // Stripe-tier manual withdrawal flow via real-time Postgres RPC
+      const { data, error } = await supabase.rpc('initiate_manual_withdrawal', {
+        p_amount_kobo: Math.round(parseFloat(withdrawAmount) * 100),
+        p_bank_name: bankName,
+        p_account_number: accountNumber,
+        p_account_name: accountName,
       });
 
       if (error) {
@@ -174,14 +175,13 @@ export default function WithdrawModal({ open, onClose, balance, profile, onSucce
         throw new Error(error.message || 'Withdrawal failed');
       }
 
-      if (!data.success) {
-        if (data.code === 'PLATFORM_UPGRADE_REQUIRED') {
-          toast.error(data.error);
-        } else {
-          toast.error(data.error || 'Withdrawal failed');
-        }
+      const result = data as { success: boolean; error?: string; new_balance?: number };
+      if (!result?.success) {
+        toast.error(result?.error || 'Withdrawal failed');
         return;
       }
+
+      toast.success('Withdrawal initiated. Your payout is queued for secure manual processing.');
 
       // NEW: Trigger Ambassador check silently in the background
       void supabase.rpc('process_ambassador_reward', { 

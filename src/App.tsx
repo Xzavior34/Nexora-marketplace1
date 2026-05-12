@@ -22,6 +22,7 @@ import PostProduct from "./pages/PostProduct";
 import MarketplaceOrders from "./pages/MarketplaceOrders";
 import Proposals from "./pages/Proposals";
 import AdminPayouts from "./pages/AdminPayouts";
+import AdminWithdrawals from "./pages/AdminWithdrawals";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminMonitoring from "./pages/AdminMonitoring";
 import Messages from "./pages/Messages";
@@ -73,6 +74,7 @@ const App = () => (
               <Route path="/post-product" element={<PostProduct />} />
               <Route path="/proposals" element={<Proposals />} />
               <Route path="/admin/payouts" element={<AdminPayouts />} />
+              <Route path="/admin/withdrawals" element={<AdminWithdrawals />} />
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/admin/monitoring" element={<AdminMonitoring />} />
               <Route path="/messages" element={<Messages />} />
