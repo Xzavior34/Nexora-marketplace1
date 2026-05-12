@@ -44,7 +44,7 @@ export function PayForGigModal({ open, onOpenChange, task }: PayForGigModalProps
       if (error) throw error;
 
       if (data?.authorization_url) {
-        // Redirect to Paystack
+        // Redirect to Squad
         window.location.href = data.authorization_url;
       } else {
         throw new Error('No payment URL received');
@@ -74,7 +74,7 @@ export function PayForGigModal({ open, onOpenChange, task }: PayForGigModalProps
             Pay for Gig
           </DialogTitle>
           <DialogDescription>
-            Secure payment via Paystack. Funds held in escrow until work is completed.
+            Secure payment via Squad. Funds held in escrow until work is completed.
           </DialogDescription>
         </DialogHeader>
 
@@ -108,7 +108,7 @@ export function PayForGigModal({ open, onOpenChange, task }: PayForGigModalProps
           <div className="flex items-start gap-2 text-sm text-amber-600 bg-amber-50 dark:bg-amber-950/20 rounded-lg p-3">
             <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
             <p>
-              You will be redirected to Paystack to complete payment securely.
+              You will be redirected to Squad to complete payment securely.
             </p>
           </div>
         </div>
