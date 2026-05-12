@@ -200,7 +200,7 @@ export default function Leaderboard() {
           <div className="flex-1 min-w-0 z-10">
             <p className="font-bold text-foreground text-sm sm:text-base truncate">You ({userEntry.full_name})</p>
             <div className="flex items-center gap-2 text-[10px] sm:text-xs text-muted-foreground mt-0.5">
-              <span className="truncate max-w-[120px] sm:max-w-none">{userEntry.university || 'Student'}</span>
+              <span className="truncate max-w-[120px] sm:max-w-none">{userEntry.university || 'Nigeria'}</span>
               {userEntry.reviews > 0 && (
                 <span className="flex items-center text-amber-500 font-medium whitespace-nowrap">
                   • <Star className="h-3 w-3 fill-amber-500 ml-1 mr-0.5" /> {userEntry.reviews}
@@ -257,7 +257,7 @@ export default function Leaderboard() {
                 {entry.full_name || 'Anonymous'} {entry.id === user?.id && "(You)"}
               </p>
               <div className="flex items-center gap-2 text-[10px] sm:text-xs text-muted-foreground mt-0.5">
-                <span className="truncate max-w-[120px] sm:max-w-none">{entry.university || 'Student'}</span>
+                <span className="truncate max-w-[120px] sm:max-w-none">{entry.university || 'Nigeria'}</span>
                 {entry.reviews > 0 && (
                   <span className="flex items-center text-amber-500 font-medium whitespace-nowrap">
                     • <Star className="h-3 w-3 fill-amber-500 ml-1 mr-0.5" /> {entry.reviews}
@@ -286,7 +286,7 @@ export default function Leaderboard() {
             </Button>
             <h1 className="text-lg sm:text-xl font-bold flex items-center gap-2 truncate">
               <Trophy className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500 shrink-0" />
-              <span className="truncate">Campus Leaderboard</span>
+              <span className="truncate">Nexora Leaderboard</span>
             </h1>
           </div>
           

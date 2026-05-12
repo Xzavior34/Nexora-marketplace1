@@ -287,7 +287,7 @@ export default function PostGig() {
                     <span><b>AI suggests ₦{aiPrice.price.toLocaleString()}</b> — {aiPrice.reason}</span>
                   </div>
                 )}
-                <p className="text-xs text-muted-foreground">20% platform fee will be deducted from the worker's pay</p>
+                <p className="text-xs text-muted-foreground">Funds are secured in Squad Escrow until you confirm the work is complete.</p>
                 {errors.price && <p className="text-sm text-destructive">{errors.price}</p>}
               </div>
 

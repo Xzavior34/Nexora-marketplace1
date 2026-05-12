@@ -35,7 +35,7 @@ export default function Privacy() {
               <h2 className="text-xl font-semibold text-foreground">1. Information We Collect</h2>
               <p className="text-muted-foreground leading-relaxed">We collect the following information:</p>
               <ul className="list-disc pl-6 text-muted-foreground space-y-2">
-                <li><strong className="text-foreground">Account Information:</strong> Name, email, university, phone number</li>
+                <li><strong className="text-foreground">Account Information:</strong> Name, email, location, phone number</li>
                 <li><strong className="text-foreground">Profile Information:</strong> Bio, skills, profile photo</li>
                 <li><strong className="text-foreground">Transaction Data:</strong> Payment history, wallet balance, bank details for withdrawals</li>
                 <li><strong className="text-foreground">Usage Data:</strong> How you interact with our platform</li>
@@ -61,7 +61,7 @@ export default function Privacy() {
                 We do not sell your personal information. We may share information with:
               </p>
               <ul className="list-disc pl-6 text-muted-foreground space-y-2">
-                <li><strong className="text-foreground">Payment Processors:</strong> Paystack for payment processing</li>
+                <li><strong className="text-foreground">Payment Processors:</strong> Squad by GTCO for secure payment processing and escrow</li>
                 <li><strong className="text-foreground">Email Services:</strong> For notifications and communications</li>
                 <li><strong className="text-foreground">Legal Authorities:</strong> When required by law</li>
                 <li><strong className="text-foreground">Other Users:</strong> Your public profile information</li>

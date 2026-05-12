@@ -382,7 +382,7 @@ export default function Profile() {
                 />
               </div>
               <h2 className="text-xl font-bold text-foreground">
-                {profile.full_name || 'University Student'}
+                {profile.full_name || 'Nexora Member'}
               </h2>
               <p className="text-muted-foreground">{profile.email}</p>
               <div className="flex items-center gap-2 mt-2 flex-wrap justify-center">
@@ -740,7 +740,7 @@ export default function Profile() {
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Search by name, email, or university..."
+                    placeholder="Search by name, email, or location..."
                     value={userSearchQuery}
                     onChange={(e) => setUserSearchQuery(e.target.value)}
                     className="pl-9"

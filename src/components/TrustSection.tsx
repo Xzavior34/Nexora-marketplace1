@@ -13,7 +13,7 @@ const trustPoints = [
   },
   {
     icon: Banknote,
-    title: "Naira Payments via Paystack",
+    title: "Naira Payments via Squad",
     description: "Pay and get paid in Naira. Direct bank transfers, no hassle.",
   },
   {
@@ -24,7 +24,7 @@ const trustPoints = [
   {
     icon: Users,
     title: "Peer Reviews",
-    description: "Rate and review after every gig. Build your campus reputation.",
+    description: "Rate and review after every gig. Build your Nexora reputation.",
   },
   {
     icon: Shield,
@@ -42,10 +42,10 @@ const TrustSection = () => {
             Why Trust Us
           </span>
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Built for Students, Secured Like Banks
+            Built for Nigerians, Secured Like Banks
           </h2>
           <p className="text-muted-foreground max-w-xl mx-auto text-lg">
-            We handle your money with the same care as Opay and Paystack. No cap.
+            We handle your money with bank-grade security powered by Squad by GTCO.
           </p>
         </div>
 

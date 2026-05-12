@@ -57,7 +57,7 @@ export default function Terms() {
             <section>
               <h2 className="text-xl font-semibold text-foreground">3. Platform Role & Limitation of Liability</h2>
               <p className="text-muted-foreground leading-relaxed">
-                Nexora serves as a marketplace connecting students for gig-based work. We are <strong className="text-foreground">not</strong> a party 
+                Nexora serves as a marketplace connecting Nigerians for gig-based work. We are <strong className="text-foreground">not</strong> a party 
                 to any agreement between users. We do not guarantee the quality, safety, or legality of gigs posted.
               </p>
               <p className="text-muted-foreground leading-relaxed mt-3">
