@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowUpRight, ArrowDownLeft, Wallet, RefreshCw } from 'lucide-react';
 import { format } from 'date-fns';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface Transaction {
   id: string;
@@ -156,38 +157,56 @@ export default function TransactionList({ userId }: TransactionListProps) {
             </p>
           </div>
         ) : (
-          <div className="space-y-4">
-            {transactions.map((tx) => (
-              <div
-                key={tx.id}
-                className="flex items-center gap-4 p-3 rounded-lg hover:bg-muted/50 transition-colors"
-              >
-                <div className={`h-10 w-10 rounded-full flex items-center justify-center ${
-                  isCredit(tx.type) ? 'bg-primary/10' : 'bg-destructive/10'
-                }`}>
-                  {getTransactionIcon(tx.type)}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-medium text-foreground truncate">
-                    {getTransactionLabel(tx.type)}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {format(new Date(tx.created_at), 'MMM d, yyyy • h:mm a')}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className={`font-semibold ${
-                    isCredit(tx.type) ? 'text-primary' : 'text-foreground'
+          <motion.div 
+            className="space-y-4"
+            initial="hidden"
+            animate="visible"
+            variants={{
+              hidden: { opacity: 0 },
+              visible: { opacity: 1, transition: { staggerChildren: 0.05 } }
+            }}
+          >
+            <AnimatePresence>
+              {transactions.map((tx) => (
+                <motion.div
+                  key={tx.id}
+                  variants={{
+                    hidden: { opacity: 0, x: -10 },
+                    visible: { opacity: 1, x: 0, transition: { type: "spring", stiffness: 400, damping: 30 } }
+                  }}
+                  initial="hidden"
+                  animate="visible"
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  layout
+                  className="flex items-center gap-4 p-3 rounded-lg hover:bg-muted/50 transition-colors"
+                >
+                  <div className={`h-10 w-10 rounded-full flex items-center justify-center ${
+                    isCredit(tx.type) ? 'bg-primary/10' : 'bg-destructive/10'
                   }`}>
-                    {isCredit(tx.type) ? '+' : '-'}{formatNaira(tx.amount_kobo)}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Bal: {formatNaira(tx.balance_after_kobo)}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
+                    {getTransactionIcon(tx.type)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-foreground truncate">
+                      {getTransactionLabel(tx.type)}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {format(new Date(tx.created_at), 'MMM d, yyyy • h:mm a')}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className={`font-semibold ${
+                      isCredit(tx.type) ? 'text-primary' : 'text-foreground'
+                    }`}>
+                      {isCredit(tx.type) ? '+' : '-'}{formatNaira(tx.amount_kobo)}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Bal: {formatNaira(tx.balance_after_kobo)}
+                    </p>
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </motion.div>
         )}
       </CardContent>
     </Card>

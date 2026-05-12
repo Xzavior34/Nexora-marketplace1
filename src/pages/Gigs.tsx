@@ -31,6 +31,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { NIGERIAN_UNIVERSITIES } from '@/lib/nigerianUniversities';
+import { motion } from 'framer-motion';
 
 const CATEGORIES = [
   'All Categories',
@@ -409,11 +410,16 @@ export default function Gigs() {
         ) : (
           <div className="space-y-4">
             {tasks.map((task) => (
-              <Card 
-                key={task.id} 
-                className="hover:shadow-md transition-shadow cursor-pointer"
-                onClick={() => navigate(`/gigs/${task.id}`)}
+              <motion.div 
+                key={task.id}
+                whileHover={{ scale: 1.02, rotateX: 2, rotateY: 2 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                style={{ perspective: 1000 }}
               >
+                <Card 
+                  className="hover:shadow-md transition-shadow cursor-pointer glass"
+                  onClick={() => navigate(`/gigs/${task.id}`)}
+                >
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
@@ -464,6 +470,7 @@ export default function Gigs() {
                   </div>
                 </CardContent>
               </Card>
+              </motion.div>
             ))}
           </div>
         )}

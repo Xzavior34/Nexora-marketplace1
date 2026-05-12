@@ -10,8 +10,8 @@ const Index = () => {
     <main className="min-h-screen">
       <SEOHead
         title="Nexora — The Intelligent Freelance Economy"
-        description="Nigeria's intelligent freelance economy. AI-matched gigs, Squad Escrow security, and AjoSquad auto-savings for every Nigerian."
-        keywords="Nexora, Nigeria freelance, AI marketplace, Squad escrow, AjoSquad, fintech Nigeria, intelligent economy"
+        description="Nigeria's intelligent freelance economy. Find top artisans, web developers, and workers. AI-matched gigs, Squad Escrow security, and AjoSquad."
+        keywords="Nexora, Nigeria freelance, AI marketplace, Squad escrow, AjoSquad, artisan nigeria, intelligent economy"
         ogType="website"
         canonical="https://unigig.site"
       />

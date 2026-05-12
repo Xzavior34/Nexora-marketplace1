@@ -14,6 +14,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Bell, CheckCheck, Loader2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { motion } from 'framer-motion';
 
 export function NotificationBell() {
   const navigate = useNavigate();
@@ -68,8 +69,14 @@ export function NotificationBell() {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="h-5 w-5" />
+        <Button variant="ghost" size="icon" className="relative group">
+          <motion.div
+            animate={unreadCount > 0 ? { rotate: [0, -10, 10, -10, 10, 0] } : {}}
+            transition={{ duration: 0.5, repeat: unreadCount > 0 ? Infinity : 0, repeatDelay: 3 }}
+            whileHover={{ scale: 1.1, rotate: 15 }}
+          >
+            <Bell className="h-5 w-5" />
+          </motion.div>
           {unreadCount > 0 && (
             <Badge 
               className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs"

@@ -149,12 +149,12 @@ export default function WithdrawModal({ open, onClose, balance, profile, onSucce
     setIsSubmitting(true);
     try {
       const bankName = banks.find(b => b.code === selectedBank)?.name || profile.bank_name || '';
-      
+
       const { error: updateError } = await supabase.from('profiles').update({
         bank_name: bankName,
         account_number: accountNumber,
         account_name: accountName,
-        recipient_code: null, 
+        recipient_code: null,
       }).eq('id', profile.id);
 
       if (updateError) {
@@ -184,9 +184,9 @@ export default function WithdrawModal({ open, onClose, balance, profile, onSucce
       toast.success('Withdrawal initiated. Your payout is queued for secure manual processing.');
 
       // NEW: Trigger Ambassador check silently in the background
-      void supabase.rpc('process_ambassador_reward', { 
-        p_user_id: profile.id, 
-        p_amount_kobo: parseFloat(withdrawAmount) * 100 
+      void supabase.rpc('process_ambassador_reward', {
+        p_user_id: profile.id,
+        p_amount_kobo: parseFloat(withdrawAmount) * 100
       }).then(({ error }) => { if (error) console.error(error); });
 
       setStep('success');
@@ -369,8 +369,8 @@ export default function WithdrawModal({ open, onClose, balance, profile, onSucce
                 <Button variant="outline" onClick={() => setStep('amount')} className="flex-1">
                   Back
                 </Button>
-                <Button 
-                  onClick={handleWithdraw} 
+                <Button
+                  onClick={handleWithdraw}
                   disabled={isSubmitting}
                   className="flex-1 bg-accent hover:bg-accent/90 text-accent-foreground"
                 >

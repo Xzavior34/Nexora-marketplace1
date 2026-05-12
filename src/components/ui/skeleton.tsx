@@ -1,21 +1,23 @@
+import { motion, HTMLMotionProps } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 /**
  * Premium shimmer skeleton — quiet luxury baseline.
  * Replaces all <Loader2 /> spinners across the app.
  */
-function Skeleton({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+function Skeleton({ className, ...props }: HTMLMotionProps<"div">) {
   return (
-    <div
-      className={cn(
-        "relative overflow-hidden rounded-xl bg-muted/70",
-        "before:absolute before:inset-0 before:-translate-x-full",
-        "before:animate-[shimmer_1.8s_infinite]",
-        "before:bg-gradient-to-r before:from-transparent before:via-background/60 before:to-transparent",
-        className
-      )}
+    <motion.div
+      className={cn("relative overflow-hidden rounded-xl bg-muted/70", className)}
       {...props}
-    />
+    >
+      <motion.div
+        className="absolute inset-0 bg-gradient-to-r from-transparent via-background/60 to-transparent"
+        initial={{ x: "-100%" }}
+        animate={{ x: "100%" }}
+        transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+      />
+    </motion.div>
   );
 }
 

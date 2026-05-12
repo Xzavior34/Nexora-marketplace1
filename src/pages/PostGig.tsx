@@ -41,7 +41,7 @@ const taskSchema = z.object({
 export default function PostGig() {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
-  
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [aiPrice, setAiPrice] = useState<{ price: number; reason: string } | null>(null);
@@ -147,8 +147,8 @@ export default function PostGig() {
       // Sync gig creator to Brevo List #9 (fire and forget)
       if (profile) {
         supabase.functions.invoke('send-brevo-verification', {
-          body: { 
-            email: profile.email, 
+          body: {
+            email: profile.email,
             fullName: profile.full_name,
             listId: 9,
           },

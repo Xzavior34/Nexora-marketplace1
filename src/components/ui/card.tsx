@@ -1,10 +1,21 @@
 import * as React from "react";
+import { motion, HTMLMotionProps } from "framer-motion";
 
 import { cn } from "@/lib/utils";
 
-const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn("rounded-2xl border border-border/60 bg-card text-card-foreground shadow-sm transition-shadow duration-300 hover:shadow-md", className)} {...props} />
-));
+const Card = React.forwardRef<HTMLDivElement, HTMLMotionProps<"div">>(({ className, ...props }, ref) => {
+  const springConfig = { type: "spring", stiffness: 400, damping: 30 };
+  
+  return (
+    <motion.div 
+      ref={ref} 
+      className={cn("rounded-2xl border-0 bg-card text-card-foreground shadow-md transition-shadow hover:shadow-stripe", className)} 
+      whileHover={{ y: -4 }}
+      transition={springConfig}
+      {...props} 
+    />
+  );
+});
 Card.displayName = "Card";
 
 const CardHeader = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(

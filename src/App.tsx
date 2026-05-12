@@ -8,6 +8,7 @@ import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { Navbar } from "@/components/layout/Navbar";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
+import { useLenis } from "@/hooks/useLenis";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
@@ -43,6 +44,12 @@ const OnlineStatusTracker = () => {
   return null;
 };
 
+// Initialise Lenis smooth scroll globally
+const LenisInit = () => {
+  useLenis();
+  return null;
+};
+
 const BottomNavWrapper = () => {
   const unread = useUnreadMessages();
   return <BottomNav unreadMessages={unread} />;
@@ -56,6 +63,7 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <OnlineStatusTracker />
+          <LenisInit />
           <Navbar />
           <div className="pb-16 md:pb-0">
             <Routes>
