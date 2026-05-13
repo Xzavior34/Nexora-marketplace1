@@ -25,6 +25,20 @@ interface Bank {
   code: string;
 }
 
+const FALLBACK_BANKS: Bank[] = [
+  { name: 'Access Bank', code: '044' },
+  { name: 'Guaranty Trust Bank (GTB)', code: '058' },
+  { name: 'Zenith Bank', code: '057' },
+  { name: 'United Bank for Africa (UBA)', code: '033' },
+  { name: 'First Bank of Nigeria', code: '011' },
+  { name: 'Fidelity Bank', code: '070' },
+  { name: 'Sterling Bank', code: '030' },
+  { name: 'Union Bank of Nigeria', code: '032' },
+  { name: 'Wema Bank', code: '035' },
+  { name: 'OPay Digital Services', code: '999992' },
+  { name: 'PalmPay', code: '999991' },
+];
+
 interface Profile {
   id: string;
   bank_name: string | null;
@@ -85,10 +99,13 @@ export default function WithdrawModal({ open, onClose, balance, profile, onSucce
     setLoadingBanks(true);
     try {
       const { data, error } = await supabase.functions.invoke('squad-banks');
-      if (error) throw error;
-      setBanks(data.banks || []);
+      if (error || !data?.banks?.length) {
+        setBanks(FALLBACK_BANKS);
+      } else {
+        setBanks(data.banks);
+      }
     } catch (err) {
-      toast.error('Failed to load banks');
+      setBanks(FALLBACK_BANKS);
     } finally {
       setLoadingBanks(false);
     }
