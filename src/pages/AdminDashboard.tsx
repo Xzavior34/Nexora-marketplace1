@@ -53,7 +53,7 @@ export default function AdminDashboard() {
   const [userFakeGigs, setUserFakeGigs] = useState<any[]>([]);
   const [userFakeReviews, setUserFakeReviews] = useState<any[]>([]);
   const [newFakeGig, setNewFakeGig] = useState({ title: '', price: 5000 });
-  const [newFakeReview, setNewFakeReview] = useState({ reviewer_name: 'Anonymous Student', rating: 5, comment: '' });
+  const [newFakeReview, setNewFakeReview] = useState({ reviewer_name: 'Anonymous User', rating: 5, comment: '' });
   const [isCreatingFake, setIsCreatingFake] = useState(false);
   const [newFakeUser, setNewFakeUser] = useState({ full_name: '', email: '', university: '' });
   const [autoBoost, setAutoBoost] = useState(false);
@@ -375,7 +375,7 @@ const handleDeleteUser = async (targetId: string, email: string) => {
       const { error } = await (supabase.from("reviews") as any).insert(reviewObj);
       if (error) setUserFakeReviews([reviewObj, ...userFakeReviews]); else openContentModal(contentUser);
       
-      setNewFakeReview({ reviewer_name: 'Anonymous Student', rating: 5, comment: '' });
+      setNewFakeReview({ reviewer_name: 'Anonymous User', rating: 5, comment: '' });
       toast.success("Fake review added!");
     } catch (err: any) { toast.error(err.message); } finally { setProcessing(null); }
   };
@@ -474,7 +474,7 @@ const handleDeleteUser = async (targetId: string, email: string) => {
               <Card key={u.id}>
                 <CardContent className="p-3 sm:p-4 flex flex-col gap-3">
                   <div className="min-w-0">
-                    <p className="font-bold text-sm truncate">{u.full_name || "New Student"}</p>
+                    <p className="font-bold text-sm truncate">{u.full_name || "New User"}</p>
                     <p className="text-[11px] text-muted-foreground truncate">{u.email}</p>
                     <p className="text-[11px] text-muted-foreground">{formatNaira(u.wallet_balance)}</p>
                     <div className="flex gap-1 mt-1.5 flex-wrap">

@@ -93,7 +93,7 @@ const Footer = () => {
             <ul className="space-y-3 text-sm text-background/60">
               <li className="flex items-center gap-2">
                 <Mail className="h-4 w-4" />
-                <a href="mailto:support@unigig.site" className="hover:text-background transition-colors">support@unigig.site</a>
+                <a href="mailto:support@nexora.ng" className="hover:text-background transition-colors">support@nexora.ng</a>
               </li>
               <li className="flex items-center gap-4 mt-5">
                 <a href="#" className="h-10 w-10 rounded-full bg-background/10 flex items-center justify-center hover:bg-background/20 transition-colors">

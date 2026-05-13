@@ -29,7 +29,7 @@ export function TiltCard({
   const rawX = useMotionValue(0);
   const rawY = useMotionValue(0);
 
-  const springConfig = { stiffness: 280, damping: 22 };
+  const springConfig = { stiffness: 180, damping: 25, mass: 1.2 };
   const springX = useSpring(rawX, springConfig);
   const springY = useSpring(rawY, springConfig);
 

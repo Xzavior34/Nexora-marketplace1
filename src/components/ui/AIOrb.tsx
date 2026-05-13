@@ -66,9 +66,9 @@ const fragmentShader = /* glsl */`
     float mouseEffect = length(uMouse) * 0.3;
     iridColor += mouseEffect * vec3(0.3, 0.1, 0.5);
     
-    // Core glow
-    vec3 finalColor = mix(iridColor * uIntensity, vec3(1.0), fresnel * 0.6);
-    float alpha = mix(0.8, 1.0, fresnel);
+    // Core glow - making it much brighter and richer
+    vec3 finalColor = mix(iridColor * uIntensity, vec3(1.0), fresnel * 0.8);
+    float alpha = mix(0.85, 1.0, fresnel);
     
     gl_FragColor = vec4(finalColor, alpha);
   }
@@ -80,8 +80,8 @@ function OrbMesh({ matchScore, mouseX, mouseY }: AIOrbProps & { mouseX: number; 
   const uniforms = useRef({
     uTime:      { value: 0 },
     uColor:     { value: scoreToColor(matchScore) },
-    uDistort:   { value: matchScore >= 80 ? 0.18 : matchScore >= 50 ? 0.1 : 0.05 },
-    uIntensity: { value: matchScore >= 80 ? 2.5 : 1.8 },
+    uDistort:   { value: matchScore >= 80 ? 0.22 : matchScore >= 50 ? 0.15 : 0.08 },
+    uIntensity: { value: matchScore >= 80 ? 3.5 : 2.5 },
     uMouse:     { value: new THREE.Vector2(0, 0) },
   });
 
@@ -109,7 +109,7 @@ function OrbMesh({ matchScore, mouseX, mouseY }: AIOrbProps & { mouseX: number; 
     <Float speed={speed * 0.8} rotationIntensity={0.3} floatIntensity={0.5}>
       {/* Custom shader core */}
       <mesh ref={meshRef}>
-        <icosahedronGeometry args={[0.7, 6]} />
+        <sphereGeometry args={[0.7, 64, 64]} />
         <shaderMaterial
           vertexShader={vertexShader}
           fragmentShader={fragmentShader}
@@ -143,7 +143,7 @@ function OrbMesh({ matchScore, mouseX, mouseY }: AIOrbProps & { mouseX: number; 
         <meshBasicMaterial
           color={scoreToColor(matchScore)}
           transparent
-          opacity={0.18}
+          opacity={0.35}
           blending={THREE.AdditiveBlending}
           depthWrite={false}
           side={THREE.BackSide}

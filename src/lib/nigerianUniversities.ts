@@ -148,8 +148,7 @@ export const NIGERIAN_UNIVERSITIES = [
   "Other (Not Listed)",
 ].sort();
 
-// Check if a university is FUNAAB
-export const isFUNAABStudent = (university: string): boolean => {
-  return university.includes("Federal University of Agriculture, Abeokuta") || 
-         university.includes("FUNAAB");
+// Check if a university is a key partner (e.g., initial pivot partner)
+export const isPartnerUniversity = (university: string): boolean => {
+  return university.includes("Partner");
 };

@@ -13,9 +13,9 @@ export function SEOHead({
   title = 'Nexora — The Intelligent Freelance Economy',
   description = "Nigeria's intelligent freelance economy. AI-matched gigs, Squad Escrow security, and AjoSquad auto-savings for every Nigerian.",
   keywords = 'Nexora, Nigeria freelance, AI marketplace, Squad escrow, AjoSquad, fintech Nigeria, intelligent economy',
-  ogImage = 'https://unigig.site/og-image.png',
+  ogImage = 'https://nexora.ng/og-image.png',
   ogType = 'website',
-  canonical = 'https://unigig.site',
+  canonical = 'https://nexora.ng',
 }: SEOHeadProps) {
   useEffect(() => {
     document.title = title;

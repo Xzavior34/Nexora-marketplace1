@@ -108,7 +108,7 @@ export function ProductModal({ product, isOpen, onClose, onBuy, onChat }: Produc
           {/* Seller Info */}
           <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 p-2 rounded-lg">
             <User className="h-4 w-4" />
-            <span>Sold by <strong className="text-foreground">{product.profiles?.full_name || 'Student'}</strong></span>
+            <span>Sold by <strong className="text-foreground">{product.profiles?.full_name || 'Professional'}</strong></span>
           </div>
 
           {/* Description */}

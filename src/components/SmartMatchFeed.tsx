@@ -56,7 +56,7 @@ const cardVariant = {
   visible: { opacity: 1, y: 0, scale: 1, transition: { type: 'spring', stiffness: 300, damping: 24 } },
 };
 
-export default function SmartMatchFeed({ userId }: { userId: string }) {
+export default function SmartMatchFeed({ userId, demoMode = false }: { userId: string, demoMode?: boolean }) {
   const navigate = useNavigate();
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
@@ -65,6 +65,22 @@ export default function SmartMatchFeed({ userId }: { userId: string }) {
   const inView = useInView(sectionRef, { once: true, margin: '-40px' });
 
   useEffect(() => {
+    if (demoMode) {
+      setMatches([
+        {
+          id: 'demo1', title: 'Senior React Developer Needed', description: 'We need an experienced React dev to build a high-performance marketplace interface.', category: 'Web & Tech', price_kobo: 25000000, location: 'Lagos, NG', deadline: null, created_at: new Date().toISOString(), poster_id: '1', poster_name: 'TechCorp', poster_avatar: null, poster_university: null, match_score: 96
+        },
+        {
+          id: 'demo2', title: 'Brand Identity & Logo Design', description: 'Looking for a creative designer to revamp our national brand identity.', category: 'Design', price_kobo: 8500000, location: 'Abuja, NG', deadline: null, created_at: new Date().toISOString(), poster_id: '2', poster_name: 'DesignHub', poster_avatar: null, poster_university: null, match_score: 82
+        },
+        {
+          id: 'demo3', title: 'Supply Chain Logistics Manager', description: 'Coordinate nationwide delivery logistics for a fast-growing e-commerce startup.', category: 'Logistics', price_kobo: 12000000, location: 'Port Harcourt, NG', deadline: null, created_at: new Date().toISOString(), poster_id: '3', poster_name: 'FastDeliver', poster_avatar: null, poster_university: null, match_score: 74
+        }
+      ]);
+      setLoading(false);
+      return;
+    }
+
     let cancelled = false;
     const load = async () => {
       try {
@@ -84,7 +100,7 @@ export default function SmartMatchFeed({ userId }: { userId: string }) {
     };
     if (userId) load();
     return () => { cancelled = true; };
-  }, [userId]);
+  }, [userId, demoMode]);
 
   const scroll = (dir: -1 | 1) => {
     const el = scrollerRef.current;

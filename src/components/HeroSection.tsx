@@ -7,6 +7,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from 'lucide-react';
 import { Hero3DBackground } from '@/components/Hero3DBackground';
 import { motion, useInView, useMotionValue, useSpring, useTransform } from 'framer-motion';
+import { FloatingMockup } from '@/components/ui/FloatingMockup';
 
 // Magnetic button wrapper
 function MagneticButton({ children, className, onClick, variant, size }: any) {
@@ -230,7 +231,7 @@ const HeroSection = () => {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
           >
-            <div className="relative w-full h-[580px]">
+            <FloatingMockup className="relative w-full h-[580px]">
               {/* Main mock card */}
               <div className="absolute top-0 right-0 w-[88%] glass-premium rounded-3xl p-6 shadow-depth-xl z-20">
                 <div className="flex items-center gap-3 mb-5">
@@ -320,7 +321,7 @@ const HeroSection = () => {
                   <span className="text-xs font-bold">2,400+ earners</span>
                 </div>
               </motion.div>
-            </div>
+            </FloatingMockup>
           </motion.div>
         </div>
       </div>
