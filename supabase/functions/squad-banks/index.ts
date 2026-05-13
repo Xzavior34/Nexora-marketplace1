@@ -11,35 +11,37 @@ serve(async (req) => {
   }
 
   try {
-    const PAYSTACK_SECRET_KEY = Deno.env.get("PAYSTACK_SECRET_KEY");
-
-    if (!PAYSTACK_SECRET_KEY) {
+    const SQUAD_SECRET_KEY = Deno.env.get("SQUAD_SECRET_KEY");
+    if (!SQUAD_SECRET_KEY) {
       throw new Error("Server configuration error");
     }
 
-    console.log("Fetching Nigerian banks list...");
+    const SQUAD_BASE = (Deno.env.get('SQUAD_ENV') ?? 'sandbox') === 'live'
+      ? 'https://api-d.squadco.com'
+      : 'https://sandbox-api-d.squadco.com';
 
-    const banksResponse = await fetch("https://api.paystack.co/bank?country=nigeria", {
-      headers: { "Authorization": `Bearer ${PAYSTACK_SECRET_KEY}` },
+    console.log("Fetching Nigerian banks list via Squad...");
+
+    const banksResponse = await fetch(`${SQUAD_BASE}/payout/banks`, {
+      headers: { "Authorization": `Bearer ${SQUAD_SECRET_KEY}` },
     });
 
     const banksData = await banksResponse.json();
 
-    if (!banksData.status) {
+    if (!banksResponse.ok || !banksData.data) {
       return new Response(JSON.stringify({ error: "Failed to fetch banks" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Return simplified bank list
+    // Return simplified bank list mapped to { name, code } for frontend compatibility
     const banks = banksData.data.map((bank: any) => ({
-      name: bank.name,
-      code: bank.code,
-      slug: bank.slug,
+      name: bank.bank_name || bank.name,
+      code: bank.bank_code || bank.code,
     }));
 
-    console.log(`Fetched ${banks.length} banks`);
+    console.log(`Fetched ${banks.length} banks via Squad`);
 
     return new Response(JSON.stringify({
       success: true,

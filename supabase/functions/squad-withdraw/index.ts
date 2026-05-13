@@ -10,17 +10,23 @@ interface WithdrawRequest {
   amount_kobo: number;
 }
 
+// Toggle live vs sandbox via SQUAD_ENV secret ("live" | "sandbox"). Defaults to sandbox.
+const SQUAD_ENV = (Deno.env.get("SQUAD_ENV") || "sandbox").toLowerCase();
+const SQUAD_BASE = SQUAD_ENV === "live"
+  ? "https://api-d.squadco.com"
+  : "https://sandbox-api-d.squadco.com";
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const PAYSTACK_SECRET_KEY = Deno.env.get("PAYSTACK_SECRET_KEY");
+    const SQUAD_SECRET_KEY = Deno.env.get("SQUAD_SECRET_KEY");
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
-    if (!PAYSTACK_SECRET_KEY || !SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+    if (!SQUAD_SECRET_KEY || !SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
       throw new Error("Server configuration error");
     }
 
@@ -45,7 +51,7 @@ serve(async (req) => {
     }
 
     const { amount_kobo }: WithdrawRequest = await req.json();
-    console.log(`Withdrawal request: ${amount_kobo} kobo for user ${user.id}`);
+    console.log(`Squad Withdrawal request: ${amount_kobo} kobo for user ${user.id}`);
 
     // Minimum withdrawal is ₦100 (10000 kobo)
     if (amount_kobo < 10000) {
@@ -86,62 +92,22 @@ serve(async (req) => {
       });
     }
 
-    let recipientCode = profile.recipient_code;
+    // Fetch banks to get bank code
+    const banksResponse = await fetch(`${SQUAD_BASE}/payout/banks`, {
+      headers: { "Authorization": `Bearer ${SQUAD_SECRET_KEY}` },
+    });
+    const banksData = await banksResponse.json();
+    
+    const bank = banksData.data?.find((b: any) => 
+      b.bank_name?.toLowerCase().includes(profile.bank_name.toLowerCase()) ||
+      profile.bank_name.toLowerCase().includes(b.bank_name?.toLowerCase())
+    );
 
-    // Create transfer recipient if not exists
-    if (!recipientCode) {
-      console.log("Creating new transfer recipient...");
-      
-      // First, get bank code
-      const banksResponse = await fetch("https://api.paystack.co/bank", {
-        headers: { "Authorization": `Bearer ${PAYSTACK_SECRET_KEY}` },
+    if (!bank) {
+      return new Response(JSON.stringify({ error: "Bank configuration not found. Please re-select your bank." }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
-      const banksData = await banksResponse.json();
-      
-      const bank = banksData.data?.find((b: any) => 
-        b.name.toLowerCase().includes(profile.bank_name.toLowerCase())
-      );
-
-      if (!bank) {
-        return new Response(JSON.stringify({ error: "Bank not found. Please check your bank name." }), {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
-      // Create recipient
-      const recipientResponse = await fetch("https://api.paystack.co/transferrecipient", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${PAYSTACK_SECRET_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          type: "nuban",
-          name: profile.account_name || profile.full_name,
-          account_number: profile.account_number,
-          bank_code: bank.code,
-          currency: "NGN",
-        }),
-      });
-
-      const recipientData = await recipientResponse.json();
-      console.log("Recipient response:", recipientData);
-
-      if (!recipientData.status) {
-        return new Response(JSON.stringify({ error: recipientData.message || "Failed to create transfer recipient" }), {
-          status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
-      recipientCode = recipientData.data.recipient_code;
-
-      // Save recipient code
-      await supabase
-        .from("profiles")
-        .update({ recipient_code: recipientCode })
-        .eq("id", user.id);
     }
 
     // Calculate 10% platform fee on withdrawal
@@ -188,26 +154,28 @@ serve(async (req) => {
 
     console.log(`Platform fee of ₦${platformFee / 100} logged for admin OPay 9064513390`);
 
-    // Initiate transfer to USER'S bank account - only send the net amount (after 10% fee)
-    const transferResponse = await fetch("https://api.paystack.co/transfer", {
+    // Initiate Squad transfer payout
+    const transferResponse = await fetch(`${SQUAD_BASE}/payout/transfer`, {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${PAYSTACK_SECRET_KEY}`,
+        "Authorization": `Bearer ${SQUAD_SECRET_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        source: "balance",
-        amount: userReceives,
-        recipient: recipientCode,
-        reason: "UniGigs Withdrawal",
-        reference: reference,
+        transaction_reference: reference,
+        amount: String(userReceives), // net amount
+        bank_code: bank.bank_code,
+        account_number: profile.account_number,
+        account_name: profile.account_name || profile.full_name,
+        currency_id: "NGN",
+        remark: "Nexora Withdrawal",
       }),
     });
 
     const transferData = await transferResponse.json();
-    console.log("Transfer response:", transferData);
+    console.log("Squad Transfer response:", JSON.stringify(transferData));
 
-    if (!transferData.status) {
+    if (!transferResponse.ok || !transferData.status) {
       // Refund on failure
       await supabase
         .from("profiles")
@@ -220,44 +188,13 @@ serve(async (req) => {
         amount_kobo: amount_kobo,
         balance_after_kobo: profile.wallet_balance,
         reference: `REFUND_${reference}`,
-        description: `Withdrawal failed: ${transferData.message}`,
+        description: `Withdrawal failed: ${transferData.message || "Squad transfer refused"}`,
       });
 
       // Remove admin fee record on failure
       await supabase.from("admin_fees").delete().eq("reference", reference);
 
-      // Check for Paystack insufficient balance (platform needs funding)
-      const isPaystackBalanceError = 
-        transferData.code === 'insufficient_balance' ||
-        transferData.message?.toLowerCase().includes('balance is not enough');
-
-      if (isPaystackBalanceError) {
-        return new Response(JSON.stringify({ 
-          error: "Withdrawals are temporarily unavailable due to platform maintenance. Your wallet balance has been refunded. Please try again in a few hours or contact support.",
-          code: "PLATFORM_MAINTENANCE"
-        }), {
-          status: 503,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
-      // Check for Paystack business tier limitation
-      const isBusinessUpgradeError = 
-        transferData.code === 'transfer_unavailable' ||
-        transferData.message?.toLowerCase().includes('starter business') ||
-        transferData.message?.toLowerCase().includes('third party payouts');
-
-      if (isBusinessUpgradeError) {
-        return new Response(JSON.stringify({ 
-          error: "Withdrawals are temporarily unavailable. The platform is being upgraded. Your balance has been refunded. Please try again later or contact support.",
-          code: "PLATFORM_UPGRADE_REQUIRED"
-        }), {
-          status: 503,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
-      return new Response(JSON.stringify({ error: transferData.message || "Transfer failed" }), {
+      return new Response(JSON.stringify({ error: transferData.message || "Squad transfer failed" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -266,11 +203,11 @@ serve(async (req) => {
     // Update admin fee status to completed
     await supabase.from("admin_fees").update({ status: "completed" }).eq("reference", reference);
 
-    console.log(`Withdrawal initiated: ${reference}, total: ₦${amount_kobo / 100}, user receives: ₦${userReceives / 100}, fee: ₦${platformFee / 100}`);
+    console.log(`Squad Withdrawal initiated: ${reference}, total: ₦${amount_kobo / 100}, user receives: ₦${userReceives / 100}`);
 
     // Send email notification for successful withdrawal
     try {
-      const emailResponse = await fetch(`${SUPABASE_URL}/functions/v1/send-withdrawal-email`, {
+      await fetch(`${SUPABASE_URL}/functions/v1/send-withdrawal-email`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -285,15 +222,13 @@ serve(async (req) => {
           accountNumber: profile.account_number,
         }),
       });
-      const emailData = await emailResponse.json();
-      console.log("Withdrawal email sent:", emailData);
     } catch (emailErr) {
       console.error("Failed to send withdrawal email (non-blocking):", emailErr);
     }
 
     return new Response(JSON.stringify({
       success: true,
-      message: "Withdrawal initiated successfully",
+      message: "Withdrawal initiated successfully via Squad",
       reference: reference,
       amount_kobo: amount_kobo,
       user_receives_kobo: userReceives,
@@ -306,7 +241,7 @@ serve(async (req) => {
 
   } catch (err) {
     const error = err as Error;
-    console.error("Error in withdraw:", error);
+    console.error("Error in squad withdraw:", error);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },

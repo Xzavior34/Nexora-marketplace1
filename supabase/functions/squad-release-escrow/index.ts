@@ -47,7 +47,7 @@ serve(async (req) => {
     }
 
     const { escrowId, action = "release" }: ReleaseRequest = await req.json();
-    console.log(`Escrow action: ${action} for ${escrowId}`);
+    console.log(`Squad Escrow action: ${action} for ${escrowId}`);
 
     // Get escrow details
     const { data: escrow, error: escrowError } = await supabase
@@ -130,11 +130,9 @@ serve(async (req) => {
         amount_kobo: workerAmount,
         balance_after_kobo: newBalance,
         reference: `RELEASE_${escrow.paystack_reference}`,
-        description: "Payment received for completed task",
+        description: "Payment received for completed task (escrow)",
         escrow_id: escrowId,
       });
-
-      // NO platform fee recorded here - fee is taken at withdrawal only
 
       // Send notification to worker
       await supabase.from("notifications").insert({
@@ -161,7 +159,7 @@ serve(async (req) => {
       // Send email notification for payment received
       if (payeeEmail?.email) {
         try {
-          const emailResponse = await fetch(`${SUPABASE_URL}/functions/v1/send-payment-email`, {
+          await fetch(`${SUPABASE_URL}/functions/v1/send-payment-email`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -175,21 +173,19 @@ serve(async (req) => {
               type: "escrow_release",
             }),
           });
-          const emailData = await emailResponse.json();
-          console.log("Payment email sent:", emailData);
         } catch (emailErr) {
           console.error("Failed to send payment email (non-blocking):", emailErr);
         }
       }
 
-      console.log(`Escrow ${escrowId} released. Worker received ₦${workerAmount / 100}`);
+      console.log(`Squad Escrow ${escrowId} released. Worker received ₦${workerAmount / 100}`);
 
       return new Response(JSON.stringify({
         success: true,
         action: "released",
         message: "Payment released successfully (100% to freelancer)",
         worker_amount_kobo: workerAmount,
-        platform_fee_kobo: 0, // No fee at release
+        platform_fee_kobo: 0,
       }), {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -210,7 +206,7 @@ serve(async (req) => {
         });
       }
 
-      const refundAmount = escrow.amount_kobo; // Full refund
+      const refundAmount = escrow.amount_kobo;
       const newBalance = clientProfile.wallet_balance + refundAmount;
 
       // Update client wallet
@@ -249,12 +245,12 @@ serve(async (req) => {
         data: { taskId: escrow.task_id },
       });
 
-      console.log(`Escrow ${escrowId} refunded. Client received ₦${refundAmount / 100}`);
+      console.log(`Squad Escrow ${escrowId} refunded. Client received ₦${refundAmount / 100}`);
 
       return new Response(JSON.stringify({
         success: true,
         action: "refunded",
-        message: "Payment refunded successfully",
+        message: "Payment refunded successfully via Squad",
         refund_amount_kobo: refundAmount,
       }), {
         status: 200,
@@ -269,7 +265,7 @@ serve(async (req) => {
 
   } catch (err) {
     const error = err as Error;
-    console.error("Error in release-escrow:", error);
+    console.error("Error in squad-release-escrow:", error);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },

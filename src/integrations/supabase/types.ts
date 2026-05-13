@@ -678,6 +678,8 @@ export type Database = {
           vault_balance: number
           verification_code: string | null
           verification_expires_at: string | null
+          virtual_account_number: string | null
+          virtual_bank_name: string | null
           wallet_balance: number
         }
         Insert: {
@@ -714,6 +716,8 @@ export type Database = {
           vault_balance?: number
           verification_code?: string | null
           verification_expires_at?: string | null
+          virtual_account_number?: string | null
+          virtual_bank_name?: string | null
           wallet_balance?: number
         }
         Update: {
@@ -750,6 +754,8 @@ export type Database = {
           vault_balance?: number
           verification_code?: string | null
           verification_expires_at?: string | null
+          virtual_account_number?: string | null
+          virtual_bank_name?: string | null
           wallet_balance?: number
         }
         Relationships: []

@@ -84,7 +84,7 @@ export default function WithdrawModal({ open, onClose, balance, profile, onSucce
   const fetchBanks = async () => {
     setLoadingBanks(true);
     try {
-      const { data, error } = await supabase.functions.invoke('paystack-banks');
+      const { data, error } = await supabase.functions.invoke('squad-banks');
       if (error) throw error;
       setBanks(data.banks || []);
     } catch (err) {
@@ -94,7 +94,7 @@ export default function WithdrawModal({ open, onClose, balance, profile, onSucce
     }
   };
 
-  const verifyAccount = async () => {
+  const verifyBankAccount = async () => {
     if (!selectedBank || accountNumber.length !== 10) {
       toast.error('Please select a bank and enter a valid 10-digit account number');
       return;
@@ -105,18 +105,35 @@ export default function WithdrawModal({ open, onClose, balance, profile, onSucce
     setAccountVerified(false);
 
     try {
-      const { data, error } = await supabase.functions.invoke('paystack-verify-bank', {
-        body: { account_number: accountNumber, bank_code: selectedBank },
+      const { data, error } = await supabase.functions.invoke('squad-account-lookup', {
+        body: { account_number: accountNumber.trim(), bank_code: selectedBank.trim() },
       });
 
-      if (error || !data.success) {
-        toast.error(data?.error || 'Could not verify account');
+      const isSuccess = data?.success || data?.status === 'success' || data?.status === 200;
+
+      if (error || !isSuccess) {
+        toast.error(data?.message || data?.error || 'Could not verify account');
         return;
       }
 
-      setAccountName(data.account_name);
+      const resolvedName = data.data?.account_name || data?.account_name || '';
+      setAccountName(resolvedName);
       setAccountVerified(true);
       toast.success('Account verified!');
+
+      // Persist the pre-validated account details immediately to the database ledger
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const bankName = banks.find(b => b.code === selectedBank)?.name || '';
+        await supabase
+          .from('profiles')
+          .update({
+            account_number: accountNumber.trim(),
+            bank_name: bankName,
+            account_name: resolvedName,
+          })
+          .eq('id', user.id);
+      }
     } catch (err) {
       toast.error('Account verification failed');
     } finally {
@@ -183,7 +200,7 @@ export default function WithdrawModal({ open, onClose, balance, profile, onSucce
 
       toast.success('Withdrawal initiated. Your payout is queued for secure manual processing.');
 
-      // NEW: Trigger Ambassador check silently in the background
+      // Silently trigger Ambassador check in the background
       void supabase.rpc('process_ambassador_reward', {
         p_user_id: profile.id,
         p_amount_kobo: parseFloat(withdrawAmount) * 100
@@ -233,7 +250,11 @@ export default function WithdrawModal({ open, onClose, balance, profile, onSucce
             <div className="space-y-4 py-4">
               <div className="space-y-2">
                 <Label>Select Bank</Label>
-                <Select value={selectedBank} onValueChange={setSelectedBank}>
+                <Select value={selectedBank} onValueChange={(val) => {
+                  setSelectedBank(val || '');
+                  setAccountVerified(false);
+                  setAccountName('');
+                }}>
                   <SelectTrigger>
                     <SelectValue placeholder={loadingBanks ? "Loading banks..." : "Select a bank"} />
                   </SelectTrigger>
@@ -255,7 +276,8 @@ export default function WithdrawModal({ open, onClose, balance, profile, onSucce
                   placeholder="0123456789"
                   value={accountNumber}
                   onChange={(e) => {
-                    setAccountNumber(e.target.value.replace(/\D/g, ''));
+                    const val = e.target.value || '';
+                    setAccountNumber(val.replace(/\D/g, ''));
                     setAccountVerified(false);
                     setAccountName('');
                   }}
@@ -272,7 +294,7 @@ export default function WithdrawModal({ open, onClose, balance, profile, onSucce
               <div className="flex gap-2">
                 <Button
                   variant="outline"
-                  onClick={verifyAccount}
+                  onClick={verifyBankAccount}
                   disabled={verifyingAccount || !selectedBank || accountNumber.length !== 10}
                   className="flex-1"
                 >
@@ -308,7 +330,7 @@ export default function WithdrawModal({ open, onClose, balance, profile, onSucce
                   type="number"
                   placeholder="Enter amount"
                   value={withdrawAmount}
-                  onChange={(e) => setWithdrawAmount(e.target.value)}
+                  onChange={(e) => setWithdrawAmount(e.target.value || '')}
                   min={100}
                   max={balance / 100}
                 />

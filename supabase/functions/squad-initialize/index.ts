@@ -11,18 +11,23 @@ interface InitializeRequest {
   assigneeId: string;
 }
 
+// Toggle live vs sandbox via SQUAD_ENV secret ("live" | "sandbox"). Defaults to sandbox.
+const SQUAD_ENV = (Deno.env.get("SQUAD_ENV") || "sandbox").toLowerCase();
+const SQUAD_BASE = SQUAD_ENV === "live"
+  ? "https://api-d.squadco.com"
+  : "https://sandbox-api-d.squadco.com";
+
 serve(async (req) => {
-  // Handle CORS preflight
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const PAYSTACK_SECRET_KEY = Deno.env.get("PAYSTACK_SECRET_KEY");
+    const SQUAD_SECRET_KEY = Deno.env.get("SQUAD_SECRET_KEY");
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
-    if (!PAYSTACK_SECRET_KEY || !SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+    if (!SQUAD_SECRET_KEY || !SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
       console.error("Missing environment variables");
       throw new Error("Server configuration error");
     }
@@ -51,7 +56,7 @@ serve(async (req) => {
     }
 
     const { taskId, assigneeId }: InitializeRequest = await req.json();
-    console.log(`Initializing payment for task: ${taskId}, assignee: ${assigneeId}`);
+    console.log(`Initializing payment for task: ${taskId}, assignee: ${assigneeId} via Squad`);
 
     // Get task details
     const { data: task, error: taskError } = await supabase
@@ -104,7 +109,7 @@ serve(async (req) => {
         payee_id: assigneeId,
         amount_kobo: task.price_kobo,
         platform_fee_kobo: platformFee,
-        paystack_reference: reference,
+        paystack_reference: reference, // reuse column for DB compatibility
         status: "pending",
       })
       .select()
@@ -118,40 +123,32 @@ serve(async (req) => {
       });
     }
 
-    // Initialize Paystack transaction
-    const paystackResponse = await fetch("https://api.paystack.co/transaction/initialize", {
+    const origin = req.headers.get("origin") || "https://unigig.site";
+
+    // Initialize Squad transaction
+    const squadResponse = await fetch(`${SQUAD_BASE}/transaction/initiate`, {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${PAYSTACK_SECRET_KEY}`,
+        "Authorization": `Bearer ${SQUAD_SECRET_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
         email: payerProfile.email,
-        amount: task.price_kobo, // Paystack expects amount in Kobo
-        reference: reference,
-        callback_url: `${req.headers.get("origin")}/payment/callback`,
-        metadata: {
-          escrow_id: escrow.id,
-          task_id: taskId,
-          payer_id: user.id,
-          payee_id: assigneeId,
-          custom_fields: [
-            {
-              display_name: "Task",
-              variable_name: "task_title",
-              value: task.title,
-            },
-          ],
-        },
+        amount: task.price_kobo, // Squad expects amount in Kobo
+        currency: "NGN",
+        initiate_type: "inline",
+        transaction_ref: reference,
+        callback_url: `${origin}/payment/callback`,
+        customer_name: payerProfile.full_name || "UniGig User",
       }),
     });
 
-    const paystackData = await paystackResponse.json();
-    console.log("Paystack response:", paystackData);
+    const squadData = await squadResponse.json();
+    console.log("Squad init response:", JSON.stringify(squadData));
 
-    if (!paystackData.status) {
-      console.error("Paystack error:", paystackData);
-      return new Response(JSON.stringify({ error: paystackData.message || "Payment initialization failed" }), {
+    if (!squadData?.status || !squadData?.data?.checkout_url) {
+      console.error("Squad error:", squadData);
+      return new Response(JSON.stringify({ error: squadData?.message || "Payment initialization failed" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -159,9 +156,8 @@ serve(async (req) => {
 
     return new Response(JSON.stringify({
       success: true,
-      authorization_url: paystackData.data.authorization_url,
-      access_code: paystackData.data.access_code,
-      reference: paystackData.data.reference,
+      authorization_url: squadData.data.checkout_url,
+      reference: reference,
       escrow_id: escrow.id,
     }), {
       status: 200,
@@ -170,7 +166,7 @@ serve(async (req) => {
 
   } catch (err) {
     const error = err as Error;
-    console.error("Error in paystack-initialize:", error);
+    console.error("Error in squad-initialize:", error);
     return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },

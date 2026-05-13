@@ -34,7 +34,7 @@ export function PayForGigModal({ open, onOpenChange, task }: PayForGigModalProps
     setLoading(true);
     
     try {
-      const { data, error } = await supabase.functions.invoke('paystack-initialize', {
+      const { data, error } = await supabase.functions.invoke('squad-initialize', {
         body: {
           taskId: task.id,
           assigneeId: task.assignee_id,

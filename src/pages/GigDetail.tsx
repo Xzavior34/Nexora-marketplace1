@@ -497,7 +497,7 @@ export default function GigDetail() {
 
     setActionLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('paystack-release-escrow', {
+      const { data, error } = await supabase.functions.invoke('squad-release-escrow', {
         body: { escrowId: escrow.id, action: 'release' }
       });
 
@@ -531,7 +531,7 @@ export default function GigDetail() {
 
     setActionLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('paystack-release-escrow', {
+      const { data, error } = await supabase.functions.invoke('squad-release-escrow', {
         body: { escrowId: escrow.id, action: 'decline' }
       });
 
