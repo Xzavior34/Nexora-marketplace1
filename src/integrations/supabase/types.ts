@@ -1628,11 +1628,11 @@ export type Database = {
       }
       instant_wallet_deposit: { Args: { p_amount_kobo: number }; Returns: Json }
       live_dispute_escrow: {
-        Args: { p_escrow_id: string; p_reason: string }
+        Args: { p_escrow_id: string; p_reason?: string }
         Returns: Json
       }
       live_hire_and_lock_escrow: {
-        Args: { p_amount_kobo: number; p_gig_id: string; p_worker_id: string }
+        Args: { p_amount_kobo: number; p_payee_id: string; p_task_id: string }
         Returns: Json
       }
       log_admin_action: {
@@ -1697,7 +1697,7 @@ export type Database = {
       }
       secure_mark_disputed: { Args: { p_task_id: string }; Returns: undefined }
       secure_spin_wheel: { Args: { p_user_id: string }; Returns: Json }
-      submit_live_verification: { Args: { p_nin_bvn: string }; Returns: Json }
+      submit_live_verification: { Args: { p_nin_bvn?: string }; Returns: Json }
       text_to_bytea: { Args: { data: string }; Returns: string }
       urlencode:
         | { Args: { data: Json }; Returns: string }
