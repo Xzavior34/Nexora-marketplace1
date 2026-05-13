@@ -510,8 +510,14 @@ export default function Messages() {
                 </div>
 
                 {messages.length > 0 && (
-                  <div className="px-4 pt-3">
+                  <div className="px-4 pt-3 space-y-2">
                     <ChatRiskMeter messages={messages.map(m => ({ content: m.content, sender_id: m.sender_id }))} />
+                    <SmartAgreementCard
+                      messages={messages.map(m => ({ content: m.content, sender_id: m.sender_id, created_at: m.created_at }))}
+                      taskTitle={selectedConversation.task_title}
+                      currentUserId={user.id}
+                      otherUserId={selectedConversation.other_user_id}
+                    />
                   </div>
                 )}
 
