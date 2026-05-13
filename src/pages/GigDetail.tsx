@@ -385,16 +385,29 @@ export default function GigDetail() {
     const toastId = toast.loading("Processing hire and escrow...");
 
     try {
-      const { data: result, error: rpcErr } = await supabase.rpc('hire_and_escrow', { 
-        p_task_id: task.id, 
-        p_poster_id: user.id, 
-        p_assignee_id: assigneeId, 
-        p_application_id: applicationId 
+      // Try the new atomic live escrow first (payer/payee schema)
+      let res: any = null;
+      const { data: liveResult, error: liveErr } = await supabase.rpc('live_hire_and_lock_escrow' as any, {
+        p_payee_id: assigneeId,
+        p_task_id: task.id,
+        p_amount_kobo: task.price_kobo,
       });
-      
-      if (rpcErr) throw rpcErr;
-      
-      const res = result as any;
+      if (!liveErr && (liveResult as any)?.success) {
+        // mark accepted application if present
+        if (applicationId) {
+          await supabase.from('task_applications').update({ status: 'accepted' }).eq('id', applicationId);
+        }
+        res = liveResult;
+      } else {
+        const { data: legacy, error: rpcErr } = await supabase.rpc('hire_and_escrow', {
+          p_task_id: task.id,
+          p_poster_id: user.id,
+          p_assignee_id: assigneeId,
+          p_application_id: applicationId,
+        });
+        if (rpcErr) throw rpcErr;
+        res = legacy as any;
+      }
       
       if (res.success) {
         // Silently award ticket - DB already does this, but we keep rpc for sync
