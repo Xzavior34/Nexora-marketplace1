@@ -1,4 +1,5 @@
-// Bulletproof AI Dispute Shield. Always returns 200 with a usable JSON payload.
+// AI Dispute Shield. Always returns 200 with a usable JSON payload.
+// Structured logs include req_id + code so failures are traceable, never 500.
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -17,6 +18,10 @@ const FALLBACK = {
   source: 'fallback' as const,
 };
 
+function rid() { return crypto.randomUUID().slice(0, 8); }
+function log(req_id: string, code: string, msg: string, extra: Record<string, unknown> = {}) {
+  console.log(JSON.stringify({ fn: 'dispute-shield', req_id, code, msg, ...extra }));
+}
 function ok(body: Record<string, unknown>) {
   return new Response(JSON.stringify(body), {
     status: 200,
@@ -26,6 +31,7 @@ function ok(body: Record<string, unknown>) {
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
+  const req_id = rid();
 
   let messages: ChatLine[] = [];
   let task_title = '';
@@ -33,16 +39,21 @@ Deno.serve(async (req) => {
     const body = await req.json();
     messages = Array.isArray(body?.messages) ? body.messages : [];
     task_title = body?.task_title ?? '';
-  } catch {
-    return ok(FALLBACK);
+  } catch (e) {
+    log(req_id, 'BAD_BODY', 'invalid json body', { err: (e as Error).message });
+    return ok({ ...FALLBACK, error_code: 'BAD_BODY', req_id });
   }
 
   const apiKey = Deno.env.get('LOVABLE_API_KEY');
-  if (!apiKey || messages.length === 0) {
-    return ok(FALLBACK);
+  if (!apiKey) {
+    log(req_id, 'NO_AI_KEY', 'LOVABLE_API_KEY missing');
+    return ok({ ...FALLBACK, error_code: 'NO_AI_KEY', req_id });
+  }
+  if (messages.length === 0) {
+    log(req_id, 'EMPTY_MESSAGES', 'no messages provided');
+    return ok({ ...FALLBACK, error_code: 'EMPTY_MESSAGES', req_id });
   }
 
-  // Quick risk heuristic before AI (always works).
   const text = messages.map(m => (m.content || '').toLowerCase()).join(' ');
   const riskWords = ['whatsapp', 'phone', 'call me', 'pay outside', 'cash app', 'transfer direct', 'send money to', 'gift card', 'bitcoin', 'crypto'];
   const riskHits = riskWords.reduce((n, w) => n + (text.includes(w) ? 1 : 0), 0);
@@ -90,7 +101,9 @@ Deno.serve(async (req) => {
     });
 
     if (!aiRes.ok) {
-      return ok({ ...FALLBACK, risk_score: Math.max(FALLBACK.risk_score, heuristicRisk), source: 'fallback_ai_error' });
+      const txt = await aiRes.text().catch(() => '');
+      log(req_id, 'AI_GATEWAY_ERROR', 'non-2xx from AI gateway', { status: aiRes.status, body: txt.slice(0, 300) });
+      return ok({ ...FALLBACK, risk_score: Math.max(FALLBACK.risk_score, heuristicRisk), error_code: 'AI_GATEWAY_ERROR', req_id });
     }
 
     const aiJson = await aiRes.json();
@@ -102,6 +115,7 @@ Deno.serve(async (req) => {
     const aiRisk = Number(parsed.risk_score);
     const risk = Number.isFinite(aiRisk) ? Math.max(aiRisk, heuristicRisk) : heuristicRisk;
 
+    log(req_id, 'OK', 'AI extraction success', { risk });
     return ok({
       risk_score: risk,
       agreed_price_kobo: kobo,
@@ -111,8 +125,10 @@ Deno.serve(async (req) => {
       confidence_score: Number(parsed.confidence) || 80,
       confidence: Number(parsed.confidence) || 80,
       source: 'ai',
+      req_id,
     });
-  } catch (_e) {
-    return ok({ ...FALLBACK, risk_score: Math.max(FALLBACK.risk_score, heuristicRisk), source: 'fallback_exception' });
+  } catch (e) {
+    log(req_id, 'EXCEPTION', 'unhandled error', { err: (e as Error).message });
+    return ok({ ...FALLBACK, risk_score: Math.max(FALLBACK.risk_score, heuristicRisk), error_code: 'EXCEPTION', req_id });
   }
 });

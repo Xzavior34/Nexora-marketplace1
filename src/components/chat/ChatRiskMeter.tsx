@@ -1,31 +1,54 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ShieldAlert, ShieldCheck } from 'lucide-react';
 import { checkMessageSafety } from '@/lib/safety';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Msg { content: string; sender_id: string; }
-interface Props { messages: Msg[]; }
+interface Props { messages: Msg[]; taskTitle?: string; }
 
-// Lightweight client-side AI Risk Meter — instant, no network.
-// Powered by the same safety patterns the Dispute Shield uses server-side.
-export function ChatRiskMeter({ messages }: Props) {
-  const { score, flagged } = useMemo(() => {
-    if (!messages.length) return { score: 0, flagged: [] as string[] };
-    const flaggedReasons: string[] = [];
+// AI Risk Meter — heuristic-first for instant feedback, then enhanced by the
+// Dispute Shield edge function on every 5th message. Goes red when AI risk > 50.
+export function ChatRiskMeter({ messages, taskTitle }: Props) {
+  const [aiRisk, setAiRisk] = useState<number | null>(null);
+  const lastScannedCount = useRef(0);
+
+  const heuristic = useMemo(() => {
+    if (!messages.length) return 0;
     let unsafe = 0;
     for (const m of messages) {
       const r = checkMessageSafety(m.content || '');
-      if (!r.safe) {
-        unsafe += 1;
-        if (r.message && !flaggedReasons.includes(r.message)) flaggedReasons.push(r.message);
-      }
+      if (!r.safe) unsafe += 1;
     }
     const ratio = unsafe / Math.max(messages.length, 4);
-    const raw = Math.min(100, Math.round(ratio * 220 + (unsafe > 0 ? 25 : 0)));
-    return { score: raw, flagged: flaggedReasons.slice(0, 2) };
+    return Math.min(100, Math.round(ratio * 220 + (unsafe > 0 ? 25 : 0)));
   }, [messages]);
 
-  const danger = score >= 55;
-  const warn = score >= 25 && score < 55;
+  // Fire dispute-shield every 5th new message (and on first 3+).
+  useEffect(() => {
+    const count = messages.length;
+    if (count < 3) return;
+    const shouldScan = count - lastScannedCount.current >= 5 || lastScannedCount.current === 0;
+    if (!shouldScan) return;
+    lastScannedCount.current = count;
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data } = await supabase.functions.invoke('dispute-shield', {
+          body: { messages, task_title: taskTitle ?? '' },
+        });
+        if (cancelled) return;
+        const r = Number((data as any)?.risk_score);
+        if (Number.isFinite(r)) setAiRisk(r);
+      } catch (e) {
+        console.warn('[ChatRiskMeter] dispute-shield failed silently', e);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [messages, taskTitle]);
+
+  const score = Math.max(heuristic, aiRisk ?? 0);
+  const danger = score > 50;
+  const warn = score >= 25 && score <= 50;
   const safe = score < 25;
 
   const label = danger ? 'High risk' : warn ? 'Caution' : 'Safe';
