@@ -15,6 +15,7 @@ import { useUserOnlineStatus } from '@/hooks/useUserOnlineStatus';
 import { AvatarWithStatus } from '@/components/OnlineIndicator';
 import { checkMessageSafety } from '@/lib/safety';
 import { ChatRiskMeter } from '@/components/chat/ChatRiskMeter';
+import { SmartAgreementCard } from '@/components/chat/SmartAgreementCard';
 import { toast } from 'sonner';
 
 interface Conversation {
