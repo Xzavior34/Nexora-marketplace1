@@ -386,11 +386,28 @@ export default function Profile() {
               </h2>
               <p className="text-muted-foreground">{profile.email}</p>
               <div className="flex items-center gap-2 mt-2 flex-wrap justify-center">
-                {profile.is_verified && (
+                {profile.is_verified ? (
                   <Badge className="bg-primary/10 text-primary border-0">
                     <CheckCircle2 className="h-3 w-3 mr-1" />
                     Verified
                   </Badge>
+                ) : (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-7 px-3 text-xs border-primary/40 text-primary hover:bg-primary/10"
+                    onClick={async () => {
+                      if (!user) return;
+                      const t = toast.loading('Verifying identity…');
+                      const { error } = await supabase.from('profiles').update({ is_verified: true }).eq('id', user.id);
+                      toast.dismiss(t);
+                      if (error) { toast.error('Verification failed'); return; }
+                      toast.success('Identity verified');
+                      setTimeout(() => window.location.reload(), 600);
+                    }}
+                  >
+                    <CheckCircle2 className="h-3 w-3 mr-1" /> Verify Identity
+                  </Button>
                 )}
                 <TrustTierBadge
                   completed={(profile as any).completed_gigs}
