@@ -230,12 +230,12 @@ export type Database = {
           id: string
           payee_id: string
           payer_id: string
-          paystack_reference: string | null
-          paystack_transfer_code: string | null
           platform_fee_kobo: number
           poster_id: string | null
           product_id: string | null
           released_at: string | null
+          squad_reference: string | null
+          squad_transfer_code: string | null
           status: Database["public"]["Enums"]["escrow_status"]
           task_id: string | null
           updated_at: string
@@ -248,12 +248,12 @@ export type Database = {
           id?: string
           payee_id: string
           payer_id: string
-          paystack_reference?: string | null
-          paystack_transfer_code?: string | null
           platform_fee_kobo?: number
           poster_id?: string | null
           product_id?: string | null
           released_at?: string | null
+          squad_reference?: string | null
+          squad_transfer_code?: string | null
           status?: Database["public"]["Enums"]["escrow_status"]
           task_id?: string | null
           updated_at?: string
@@ -266,12 +266,12 @@ export type Database = {
           id?: string
           payee_id?: string
           payer_id?: string
-          paystack_reference?: string | null
-          paystack_transfer_code?: string | null
           platform_fee_kobo?: number
           poster_id?: string | null
           product_id?: string | null
           released_at?: string | null
+          squad_reference?: string | null
+          squad_transfer_code?: string | null
           status?: Database["public"]["Enums"]["escrow_status"]
           task_id?: string | null
           updated_at?: string
@@ -1208,7 +1208,7 @@ export type Database = {
           amount_kobo: number
           created_at: string
           id: string
-          paystack_reference: string
+          squad_reference: string
           status: string
           transaction_status: string | null
           user_id: string
@@ -1217,7 +1217,7 @@ export type Database = {
           amount_kobo: number
           created_at?: string
           id?: string
-          paystack_reference: string
+          squad_reference: string
           status?: string
           transaction_status?: string | null
           user_id: string
@@ -1226,7 +1226,7 @@ export type Database = {
           amount_kobo?: number
           created_at?: string
           id?: string
-          paystack_reference?: string
+          squad_reference?: string
           status?: string
           transaction_status?: string | null
           user_id?: string
