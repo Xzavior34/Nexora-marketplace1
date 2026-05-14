@@ -129,7 +129,7 @@ serve(async (req) => {
         type: "escrow_release",
         amount_kobo: workerAmount,
         balance_after_kobo: newBalance,
-        reference: `RELEASE_${escrow.paystack_reference}`,
+        reference: `RELEASE_${escrow.squad_reference || escrow.id}`,
         description: "Payment received for completed task (escrow)",
         escrow_id: escrowId,
       });
@@ -266,8 +266,8 @@ serve(async (req) => {
   } catch (err) {
     const error = err as Error;
     console.error("Error in squad-release-escrow:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
+    return new Response(JSON.stringify({ error: "Escrow action failed", detail: error.message, error_code: "SQUAD_ESCROW_ACTION_FAILED" }), {
+      status: 502,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
