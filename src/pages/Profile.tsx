@@ -29,7 +29,6 @@ import {
   LogOut,
   Star,
   Search,
-  GraduationCap,
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -63,7 +62,7 @@ interface PastUser {
   id: string;
   full_name: string | null;
   avatar_url: string | null;
-  university: string | null;
+  location: string | null;
   email?: string;
 }
 
@@ -195,7 +194,7 @@ export default function Profile() {
       .in('id', Array.from(userIds));
 
     if (profiles) {
-      setPastUsers(profiles);
+      setPastUsers(profiles.map((p: any) => ({ ...p, location: p.university })));
     }
     setLoadingUsers(false);
   };
