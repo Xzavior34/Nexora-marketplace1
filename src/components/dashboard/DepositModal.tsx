@@ -61,7 +61,9 @@ export default function DepositModal({ open, onClose }: DepositModalProps) {
       const accountNumber = data?.data?.account_number || data?.account_number;
       const rawBankName = data?.data?.bank_name || data?.bank_name || data?.data?.bank || 'Squad Virtual Bank';
       if (error || !accountNumber) {
-        throw new Error(data?.error || data?.message || "Upstream banking configuration failed.");
+        toast.dismiss(t);
+        toast.error(mapSquadError(data as any, "Couldn't provision a virtual account"));
+        return;
       }
 
       // Persist real static parameters explicitly back to the user profiles table
