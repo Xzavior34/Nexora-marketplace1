@@ -396,14 +396,14 @@ export default function Gigs() {
           
           <div className="flex items-center gap-2">
             <MapPin className="h-4 w-4 text-muted-foreground shrink-0" />
-            <Select value={selectedUniversity} onValueChange={setSelectedUniversity}>
+            <Select value={selectedRegion} onValueChange={setSelectedRegion}>
               <SelectTrigger className="w-[200px]">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="max-h-[300px]">
                 <SelectItem value="All Regions">All Regions</SelectItem>
-                {NIGERIAN_UNIVERSITIES.map((uni) => (
-                  <SelectItem key={uni} value={uni}>{uni}</SelectItem>
+                {['Lagos', 'Abuja', 'Port Harcourt', 'Kano', 'Ibadan', 'Remote'].map((region) => (
+                  <SelectItem key={region} value={region}>{region}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -463,6 +463,9 @@ export default function Gigs() {
                         <Badge variant="secondary" className="shrink-0">
                           {task.category}
                         </Badge>
+                        <Badge className="shrink-0 gap-1 bg-primary/15 text-primary border border-primary/20">
+                          <Sparkles className="h-3 w-3" /> {task.ai_match_score ?? 35}% AI Match
+                        </Badge>
                       </div>
                       <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
                         {task.description}
@@ -472,12 +475,10 @@ export default function Gigs() {
                           <User className="h-3 w-3" />
                           {task.poster?.full_name || 'Anonymous'}
                         </span>
-                        {task.poster?.university && (
-                          <span className="flex items-center gap-1">
-                            <GraduationCap className="h-3 w-3" />
-                            {task.poster.university.length > 30 
-                              ? task.poster.university.substring(0, 30) + '...' 
-                              : task.poster.university}
+                        {(task.match_reasons?.length ?? 0) > 0 && (
+                          <span className="flex items-center gap-1 text-primary">
+                            <Sparkles className="h-3 w-3" />
+                            {task.match_reasons?.slice(0, 2).join(' · ')}
                           </span>
                         )}
                         {task.location && (
