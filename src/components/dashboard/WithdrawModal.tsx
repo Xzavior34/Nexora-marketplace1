@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { Loader2, CheckCircle2, AlertCircle, Wallet } from 'lucide-react';
+import { mapSquadError } from '@/lib/squadErrors';
 
 interface Bank {
   name: string;
