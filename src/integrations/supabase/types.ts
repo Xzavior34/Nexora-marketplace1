@@ -230,12 +230,12 @@ export type Database = {
           id: string
           payee_id: string
           payer_id: string
-          paystack_reference: string | null
-          paystack_transfer_code: string | null
           platform_fee_kobo: number
           poster_id: string | null
           product_id: string | null
           released_at: string | null
+          squad_reference: string | null
+          squad_transfer_code: string | null
           status: Database["public"]["Enums"]["escrow_status"]
           task_id: string | null
           updated_at: string
@@ -248,12 +248,12 @@ export type Database = {
           id?: string
           payee_id: string
           payer_id: string
-          paystack_reference?: string | null
-          paystack_transfer_code?: string | null
           platform_fee_kobo?: number
           poster_id?: string | null
           product_id?: string | null
           released_at?: string | null
+          squad_reference?: string | null
+          squad_transfer_code?: string | null
           status?: Database["public"]["Enums"]["escrow_status"]
           task_id?: string | null
           updated_at?: string
@@ -266,12 +266,12 @@ export type Database = {
           id?: string
           payee_id?: string
           payer_id?: string
-          paystack_reference?: string | null
-          paystack_transfer_code?: string | null
           platform_fee_kobo?: number
           poster_id?: string | null
           product_id?: string | null
           released_at?: string | null
+          squad_reference?: string | null
+          squad_transfer_code?: string | null
           status?: Database["public"]["Enums"]["escrow_status"]
           task_id?: string | null
           updated_at?: string
@@ -328,6 +328,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      loans: {
+        Row: {
+          amount_kobo: number
+          created_at: string
+          eligibility_score: number
+          id: string
+          reason: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_kobo: number
+          created_at?: string
+          eligibility_score?: number
+          id?: string
+          reason?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_kobo?: number
+          created_at?: string
+          eligibility_score?: number
+          id?: string
+          reason?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       messages: {
         Row: {
@@ -1175,7 +1208,7 @@ export type Database = {
           amount_kobo: number
           created_at: string
           id: string
-          paystack_reference: string
+          squad_reference: string
           status: string
           transaction_status: string | null
           user_id: string
@@ -1184,7 +1217,7 @@ export type Database = {
           amount_kobo: number
           created_at?: string
           id?: string
-          paystack_reference: string
+          squad_reference: string
           status?: string
           transaction_status?: string | null
           user_id: string
@@ -1193,7 +1226,7 @@ export type Database = {
           amount_kobo?: number
           created_at?: string
           id?: string
-          paystack_reference?: string
+          squad_reference?: string
           status?: string
           transaction_status?: string | null
           user_id?: string
@@ -1690,6 +1723,7 @@ export type Database = {
         Args: { p_buyer_id: string; p_product_id: string; p_seller_id: string }
         Returns: Json
       }
+      quick_ai_credit_scan: { Args: { _user_id?: string }; Returns: Json }
       refund_withdrawal: {
         Args: { p_admin_notes?: string; p_request_id: string }
         Returns: Json

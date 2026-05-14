@@ -96,9 +96,8 @@ serve(async (req) => {
       });
     }
 
-    // Calculate platform fee (20%)
-    const platformFee = Math.floor(task.price_kobo * 0.2);
-    const reference = `UNIGIGS_${taskId}_${Date.now()}`;
+    const platformFee = 0;
+    const reference = `SQUAD_ESCROW_${taskId}_${Date.now()}`;
 
     // Create escrow record
     const { data: escrow, error: escrowError } = await supabase
@@ -109,7 +108,7 @@ serve(async (req) => {
         payee_id: assigneeId,
         amount_kobo: task.price_kobo,
         platform_fee_kobo: platformFee,
-        paystack_reference: reference, // reuse column for DB compatibility
+        squad_reference: reference,
         status: "pending",
       })
       .select()
@@ -139,7 +138,7 @@ serve(async (req) => {
         initiate_type: "inline",
         transaction_ref: reference,
         callback_url: `${origin}/payment/callback`,
-        customer_name: payerProfile.full_name || "UniGig User",
+        customer_name: payerProfile.full_name || "Nexora User",
       }),
     });
 
@@ -167,8 +166,8 @@ serve(async (req) => {
   } catch (err) {
     const error = err as Error;
     console.error("Error in squad-initialize:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
+    return new Response(JSON.stringify({ error: "Squad payment initialization failed", detail: error.message, error_code: "SQUAD_INIT_FAILED" }), {
+      status: 502,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }

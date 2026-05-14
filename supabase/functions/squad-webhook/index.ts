@@ -34,7 +34,7 @@ serve(async (req) => {
           const { data: topup } = await supabase
             .from("wallet_topups")
             .select("*")
-            .eq("paystack_reference", transactionRef)
+            .eq("squad_reference", transactionRef)
             .maybeSingle();
 
           if (topup && topup.status !== 'success') {
@@ -77,11 +77,11 @@ serve(async (req) => {
           }
         } 
         // 1B) Escrow funding (initiated via squad-initialize)
-        else if (transactionRef.startsWith('UNIGIGS_')) {
+        else if (transactionRef.startsWith('SQUAD_ESCROW_')) {
           const { data: escrow } = await supabase
             .from("escrow_transactions")
             .select("*")
-            .eq("paystack_reference", transactionRef)
+            .eq("squad_reference", transactionRef)
             .maybeSingle();
 
           if (escrow && escrow.status === 'pending') {
@@ -147,8 +147,8 @@ serve(async (req) => {
     });
   } catch (err: any) {
     console.error("Webhook processing failure:", err.message);
-    return new Response(JSON.stringify({ error: 'Ingestion error', message: err.message }), { 
-      status: 500, 
+    return new Response(JSON.stringify({ error: 'Webhook ingestion error', message: err.message, error_code: 'SQUAD_WEBHOOK_FAILED' }), { 
+      status: 200, 
       headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
     });
   }

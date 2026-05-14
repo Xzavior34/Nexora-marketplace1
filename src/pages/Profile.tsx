@@ -29,7 +29,6 @@ import {
   LogOut,
   Star,
   Search,
-  GraduationCap,
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -63,7 +62,7 @@ interface PastUser {
   id: string;
   full_name: string | null;
   avatar_url: string | null;
-  university: string | null;
+  location: string | null;
   email?: string;
 }
 
@@ -195,7 +194,7 @@ export default function Profile() {
       .in('id', Array.from(userIds));
 
     if (profiles) {
-      setPastUsers(profiles);
+      setPastUsers(profiles.map((p: any) => ({ ...p, location: p.university })));
     }
     setLoadingUsers(false);
   };
@@ -314,7 +313,7 @@ export default function Profile() {
     !userSearchQuery || 
     u.full_name?.toLowerCase().includes(userSearchQuery.toLowerCase()) ||
     u.email.toLowerCase().includes(userSearchQuery.toLowerCase()) ||
-    u.university?.toLowerCase().includes(userSearchQuery.toLowerCase())
+    u.location?.toLowerCase().includes(userSearchQuery.toLowerCase())
   );
 
   const getStatusLabel = (task: HistoryTask) => {
@@ -796,10 +795,9 @@ export default function Profile() {
                             </p>
                             <div className="flex items-center gap-2 text-xs text-muted-foreground">
                               <span className="truncate">{u.email}</span>
-                              {u.university && (
+                              {u.location && (
                                 <Badge variant="secondary" className="text-xs shrink-0">
-                                  <GraduationCap className="h-3 w-3 mr-1" />
-                                  {u.university.length > 20 ? u.university.substring(0, 20) + '...' : u.university}
+                                  {u.location.length > 20 ? u.location.substring(0, 20) + '...' : u.location}
                                 </Badge>
                               )}
                             </div>

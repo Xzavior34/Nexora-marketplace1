@@ -27,8 +27,7 @@ export function PayForGigModal({ open, onOpenChange, task }: PayForGigModalProps
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
-  const platformFee = Math.floor(task.price_kobo * 0.2);
-  const workerReceives = task.price_kobo - platformFee;
+  const workerReceives = task.price_kobo;
 
   const handlePay = async () => {
     setLoading(true);
@@ -86,10 +85,6 @@ export function PayForGigModal({ open, onOpenChange, task }: PayForGigModalProps
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Gig Price</span>
                 <span className="font-medium">{formatNaira(task.price_kobo)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Platform Fee (20%)</span>
-                <span className="font-medium">{formatNaira(platformFee)}</span>
               </div>
               <div className="border-t pt-2 flex justify-between">
                 <span className="text-muted-foreground">Worker Receives</span>

@@ -27,34 +27,31 @@ export default function PaymentCallback() {
       // The webhook handles the actual verification.
       // We just check the status in the database (escrow OR wallet topup).
       try {
-        const { data: topup } = await supabase
+        const { data: topup } = await (supabase as any)
           .from('wallet_topups')
           .select('*')
-          .eq('paystack_reference', ref)
+          .eq('squad_reference', ref)
           .maybeSingle();
 
         if (topup) {
           if (topup.status === 'success') {
-            // Calculate net amount after 15% fee
-            const netAmount = Math.floor(topup.amount_kobo * 0.85);
             setStatus('success');
-            setMessage(`Deposit confirmed! Your wallet has been funded with ₦${(netAmount / 100).toLocaleString()} (after 15% service fee).`);
+            setMessage(`Deposit confirmed! Your wallet has been funded with ₦${((topup.amount_kobo || 0) / 100).toLocaleString()} via Squad.`);
           } else {
             // Poll for status update
             setStatus('success');
             setMessage('Deposit is being processed. Please wait...');
             
             const pollInterval = setInterval(async () => {
-              const { data: updated } = await supabase
+              const { data: updated } = await (supabase as any)
                 .from('wallet_topups')
                 .select('status, amount_kobo')
-                .eq('paystack_reference', ref)
+                .eq('squad_reference', ref)
                 .single();
               
               if (updated?.status === 'success') {
                 clearInterval(pollInterval);
-                const netAmount = Math.floor((updated.amount_kobo || 0) * 0.85);
-                setMessage(`Deposit confirmed! Your wallet has been funded with ₦${(netAmount / 100).toLocaleString()} (after 15% service fee).`);
+                setMessage(`Deposit confirmed! Your wallet has been funded with ₦${((updated.amount_kobo || 0) / 100).toLocaleString()} via Squad.`);
               }
             }, 3000);
             
@@ -64,10 +61,10 @@ export default function PaymentCallback() {
           return;
         }
 
-        const { data: escrow, error } = await supabase
+        const { data: escrow, error } = await (supabase as any)
           .from('escrow_transactions')
           .select('*, tasks!escrow_transactions_task_id_fkey(title)')
-          .eq('paystack_reference', ref)
+          .eq('squad_reference', ref)
           .single();
 
         if (error || !escrow) {
@@ -87,7 +84,7 @@ export default function PaymentCallback() {
           setMessage('Payment is being processed. Please wait a moment...');
           // Poll for status update
           const interval = setInterval(async () => {
-            const { data: updated } = await supabase
+            const { data: updated } = await (supabase as any)
               .from('escrow_transactions')
               .select('status')
               .eq('id', escrow.id)
