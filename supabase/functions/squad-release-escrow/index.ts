@@ -1,4 +1,6 @@
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+// Squad Release Escrow — atomic state transitions via release_escrow_atomic RPC.
+// Strict guard: held -> released | refunded. Wallet credited EXACTLY ONCE.
+// Structured logs + client-safe error codes. Never returns 500.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.89.0";
 
 const corsHeaders = {
@@ -6,269 +8,90 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-interface ReleaseRequest {
-  escrowId: string;
-  action: "release" | "decline";
-}
+const rid = () => crypto.randomUUID().slice(0, 8);
+const log = (req_id: string, code: string, msg: string, extra: Record<string, unknown> = {}) =>
+  console.log(JSON.stringify({ fn: "squad-release-escrow", req_id, code, msg, ...extra }));
 
-serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
-  }
+const respond = (status: number, body: Record<string, unknown>) =>
+  new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  const req_id = rid();
 
   try {
-    const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
-    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-
-    if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-      throw new Error("Server configuration error");
+    const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+    const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    if (!SUPABASE_URL || !SERVICE_KEY) {
+      log(req_id, "NO_CONFIG", "missing supabase env");
+      return respond(503, { error: "Server not configured", error_code: "NO_CONFIG", req_id });
     }
 
-    // Get auth header
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      log(req_id, "UNAUTHENTICATED", "no auth header");
+      return respond(401, { error: "Unauthorized", error_code: "UNAUTHENTICATED", req_id });
     }
 
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-
-    // Get user from token
+    const supabase = createClient(SUPABASE_URL, SERVICE_KEY);
     const token = authHeader.replace("Bearer ", "");
     const { data: { user }, error: userError } = await supabase.auth.getUser(token);
-    
     if (userError || !user) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      log(req_id, "UNAUTHENTICATED", "invalid token");
+      return respond(401, { error: "Unauthorized", error_code: "UNAUTHENTICATED", req_id });
     }
 
-    const { escrowId, action = "release" }: ReleaseRequest = await req.json();
-    console.log(`Squad Escrow action: ${action} for ${escrowId}`);
-
-    // Get escrow details
-    const { data: escrow, error: escrowError } = await supabase
-      .from("escrow_transactions")
-      .select("*")
-      .eq("id", escrowId)
-      .single();
-
-    if (escrowError || !escrow) {
-      console.error("Escrow error:", escrowError);
-      return new Response(JSON.stringify({ error: "Escrow not found" }), {
-        status: 404,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    const body = await req.json().catch(() => ({}));
+    const escrowId: string | undefined = body.escrowId;
+    const action: "release" | "decline" = body.action ?? "release";
+    if (!escrowId) {
+      log(req_id, "BAD_INPUT", "escrowId required");
+      return respond(400, { error: "escrowId required", error_code: "BAD_INPUT", req_id });
     }
 
-    // Only payer can release/decline escrow
-    if (escrow.payer_id !== user.id) {
-      return new Response(JSON.stringify({ error: "Only task poster can perform this action" }), {
-        status: 403,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    const rpcAction = action === "decline" ? "refund" : "release";
+    log(req_id, "ATTEMPT", "calling release_escrow_atomic", { escrowId, rpcAction, caller: user.id });
+
+    const { data, error } = await supabase.rpc("release_escrow_atomic", {
+      p_escrow_id: escrowId,
+      p_action: rpcAction,
+      p_caller: user.id,
+    });
+
+    if (error) {
+      log(req_id, "RPC_ERROR", "release_escrow_atomic failed", { msg: error.message });
+      return respond(502, { error: "Escrow action failed", error_code: "RPC_ERROR", req_id });
     }
 
-    if (escrow.status !== "held") {
-      return new Response(JSON.stringify({ error: "Escrow is not in held status" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    const result = data as { success?: boolean; error?: string; error_code?: string };
+    if (!result?.success) {
+      log(req_id, result?.error_code ?? "INVALID_STATE", "guard rejected", { result });
+      return respond(409, { ...result, req_id });
     }
 
-    if (action === "release") {
-      // NO FEE AT ESCROW RELEASE - Worker gets 100%
-      // Fee is only taken during withdrawal
-      const workerAmount = escrow.amount_kobo;
+    log(req_id, "OK", "escrow transitioned", { escrowId, rpcAction });
 
-      // Get payee's current balance and stats
-      const { data: payeeProfile, error: profileError } = await supabase
-        .from("profiles")
-        .select("wallet_balance, completed_gigs")
-        .eq("id", escrow.payee_id)
-        .single();
-
-      if (profileError || !payeeProfile) {
-        console.error("Payee profile error:", profileError);
-        return new Response(JSON.stringify({ error: "Payee profile not found" }), {
-          status: 404,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
-      const newBalance = payeeProfile.wallet_balance + workerAmount;
-      const completedGigs = (payeeProfile.completed_gigs || 0) + 1;
-
-      // Update payee's wallet balance and completed gigs
-      await supabase
-        .from("profiles")
-        .update({ wallet_balance: newBalance, completed_gigs: completedGigs })
-        .eq("id", escrow.payee_id);
-
-      // Update escrow status
-      await supabase
-        .from("escrow_transactions")
-        .update({ 
-          status: "released",
-          released_at: new Date().toISOString()
-        })
-        .eq("id", escrowId);
-
-      // Update task status to completed
-      await supabase
-        .from("tasks")
-        .update({ status: "completed" })
-        .eq("id", escrow.task_id);
-
-      // Create wallet transaction for worker
-      await supabase.from("wallet_transactions").insert({
-        user_id: escrow.payee_id,
-        type: "escrow_release",
-        amount_kobo: workerAmount,
-        balance_after_kobo: newBalance,
-        reference: `RELEASE_${escrow.squad_reference || escrow.id}`,
-        description: "Payment received for completed task (escrow)",
-        escrow_id: escrowId,
-      });
-
-      // Send notification to worker
-      await supabase.from("notifications").insert({
-        user_id: escrow.payee_id,
-        title: "Payment Received!",
-        body: `You've received ₦${(workerAmount / 100).toLocaleString()} for completing a gig.`,
-        data: { taskId: escrow.task_id },
-      });
-
-      // Get payee email for notification
-      const { data: payeeEmail } = await supabase
-        .from("profiles")
-        .select("email, full_name")
-        .eq("id", escrow.payee_id)
-        .single();
-
-      // Get task title
-      const { data: taskData } = await supabase
-        .from("tasks")
-        .select("title")
-        .eq("id", escrow.task_id)
-        .single();
-
-      // Send email notification for payment received
-      if (payeeEmail?.email) {
-        try {
-          await fetch(`${SUPABASE_URL}/functions/v1/send-payment-email`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
-            },
-            body: JSON.stringify({
-              email: payeeEmail.email,
-              name: payeeEmail.full_name || "User",
-              amount: workerAmount / 100,
-              taskTitle: taskData?.title,
-              type: "escrow_release",
-            }),
+    // Fire-and-forget side-effects (notification + email). Failures must not roll back.
+    try {
+      if (rpcAction === "release") {
+        const { data: esc } = await supabase
+          .from("escrow_transactions").select("payee_id, task_id, amount_kobo").eq("id", escrowId).single();
+        if (esc) {
+          await supabase.from("notifications").insert({
+            user_id: esc.payee_id,
+            title: "Payment Received!",
+            body: `You've received ₦${(esc.amount_kobo / 100).toLocaleString()} for completing a gig.`,
+            data: { taskId: esc.task_id },
           });
-        } catch (emailErr) {
-          console.error("Failed to send payment email (non-blocking):", emailErr);
         }
       }
-
-      console.log(`Squad Escrow ${escrowId} released. Worker received ₦${workerAmount / 100}`);
-
-      return new Response(JSON.stringify({
-        success: true,
-        action: "released",
-        message: "Payment released successfully (100% to freelancer)",
-        worker_amount_kobo: workerAmount,
-        platform_fee_kobo: 0,
-      }), {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-
-    } else if (action === "decline") {
-      // Refund to client (payer)
-      const { data: clientProfile, error: clientError } = await supabase
-        .from("profiles")
-        .select("wallet_balance")
-        .eq("id", escrow.payer_id)
-        .single();
-
-      if (clientError || !clientProfile) {
-        return new Response(JSON.stringify({ error: "Client profile not found" }), {
-          status: 404,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
-      const refundAmount = escrow.amount_kobo;
-      const newBalance = clientProfile.wallet_balance + refundAmount;
-
-      // Update client wallet
-      await supabase
-        .from("profiles")
-        .update({ wallet_balance: newBalance })
-        .eq("id", escrow.payer_id);
-
-      // Record refund transaction
-      await supabase.from("wallet_transactions").insert({
-        user_id: escrow.payer_id,
-        type: "refund",
-        amount_kobo: refundAmount,
-        balance_after_kobo: newBalance,
-        escrow_id: escrowId,
-        description: "Gig refunded - work declined",
-      });
-
-      // Update escrow status
-      await supabase
-        .from("escrow_transactions")
-        .update({ status: "refunded" })
-        .eq("id", escrowId);
-
-      // Update task status
-      await supabase
-        .from("tasks")
-        .update({ status: "cancelled" })
-        .eq("id", escrow.task_id);
-
-      // Send notification to worker
-      await supabase.from("notifications").insert({
-        user_id: escrow.payee_id,
-        title: "Work Declined",
-        body: "The client has declined the work. The payment has been refunded.",
-        data: { taskId: escrow.task_id },
-      });
-
-      console.log(`Squad Escrow ${escrowId} refunded. Client received ₦${refundAmount / 100}`);
-
-      return new Response(JSON.stringify({
-        success: true,
-        action: "refunded",
-        message: "Payment refunded successfully via Squad",
-        refund_amount_kobo: refundAmount,
-      }), {
-        status: 200,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    } catch (sideErr) {
+      log(req_id, "SIDE_EFFECT_WARN", "non-blocking notification failure", { err: (sideErr as Error).message });
     }
 
-    return new Response(JSON.stringify({ error: "Invalid action" }), {
-      status: 400,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-
-  } catch (err) {
-    const error = err as Error;
-    console.error("Error in squad-release-escrow:", error);
-    return new Response(JSON.stringify({ error: "Escrow action failed", detail: error.message, error_code: "SQUAD_ESCROW_ACTION_FAILED" }), {
-      status: 502,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    return respond(200, { ...result, req_id });
+  } catch (e) {
+    log(req_id, "EXCEPTION", "unhandled", { err: (e as Error).message });
+    return respond(502, { error: "Escrow action failed", error_code: "EXCEPTION", req_id });
   }
 });
