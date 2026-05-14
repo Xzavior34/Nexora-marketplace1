@@ -1766,7 +1766,7 @@ export type Database = {
         Args: { p_buyer_id: string; p_product_id: string; p_seller_id: string }
         Returns: Json
       }
-      quick_ai_credit_scan: { Args: { _user_id?: string }; Returns: Json }
+      quick_ai_credit_scan: { Args: { _user_id: string }; Returns: Json }
       refund_withdrawal: {
         Args: { p_admin_notes?: string; p_request_id: string }
         Returns: Json
