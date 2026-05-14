@@ -9,7 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { UserRating } from '@/components/UserRating';
 import { AmbassadorBadge } from '@/components/AmbassadorBadge';
 import { TrustTierBadge } from '@/components/TrustTier';
-import { ArrowLeft, Star, Briefcase, Calendar, GraduationCap, Video } from 'lucide-react';
+import { ArrowLeft, Star, Briefcase, Calendar, MapPin, Video } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface Profile {
@@ -21,7 +21,7 @@ interface Profile {
   average_rating: number | null;
   completed_gigs: number | null;
   created_at: string;
-  university: string | null;
+  location: string | null;
   is_ambassador?: boolean;
   is_verified?: boolean;
   intro_video_url?: string | null;
@@ -59,7 +59,7 @@ export default function PublicProfile() {
     try {
       const { data: profileData, error } = await supabase.from('profiles').select('id, full_name, avatar_url, bio, skills, average_rating, completed_gigs, created_at, university, is_ambassador, is_verified, intro_video_url').eq('id', id).single();
       if (error) throw error;
-      setProfile(profileData as Profile);
+      setProfile({ ...(profileData as any), location: (profileData as any).university } as Profile);
 
       const { data: gigsData } = await supabase.from('tasks').select('id, title, description, price_kobo, category, status, created_at').eq('poster_id', id!).eq('status', 'open').order('created_at', { ascending: false }).limit(6);
       setGigs(gigsData || []);
@@ -101,9 +101,9 @@ export default function PublicProfile() {
                   <TrustTierBadge completed={profile.completed_gigs} rating={averageRating} isVerified={profile.is_verified} />
                 </div>
                 
-                {profile.university && (
+                {profile.location && (
                   <Badge variant="secondary" className="mb-3 flex items-center gap-1 w-fit">
-                    <GraduationCap className="h-3 w-3" />{profile.university}
+                    <MapPin className="h-3 w-3" />{profile.location}
                   </Badge>
                 )}
                 
