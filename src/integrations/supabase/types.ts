@@ -1491,6 +1491,7 @@ export type Database = {
         Returns: Json
       }
       cleanup_old_data: { Args: never; Returns: undefined }
+      detect_financial_distress: { Args: { _user_id: string }; Returns: Json }
       dispute_product_escrow: {
         Args: { p_buyer_id: string; p_product_id: string; p_reason: string }
         Returns: Json

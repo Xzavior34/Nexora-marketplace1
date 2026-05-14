@@ -24,6 +24,7 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 import SmartMatchFeed from '@/components/SmartMatchFeed';
 import VaultCard from '@/components/dashboard/VaultCard';
 import MicroLoanCard from '@/components/dashboard/MicroLoanCard';
+import FinancialDistressCard from '@/components/dashboard/FinancialDistressCard';
 import { motion, useInView } from 'framer-motion';
 import { TiltCard } from '@/components/ui/TiltCard';
 
@@ -308,6 +309,13 @@ export default function Dashboard() {
                   vaultBalance={(profile as any).vault_balance ?? 0}
                   onChanged={refreshProfile}
                 />
+              </motion.div>
+            )}
+
+            {/* ── AI Financial Distress Detection ── */}
+            {user?.id && (
+              <motion.div variants={sectionVariant}>
+                <FinancialDistressCard userId={user.id} />
               </motion.div>
             )}
 
