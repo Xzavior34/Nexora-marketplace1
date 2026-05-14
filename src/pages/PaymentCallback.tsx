@@ -27,10 +27,10 @@ export default function PaymentCallback() {
       // The webhook handles the actual verification.
       // We just check the status in the database (escrow OR wallet topup).
       try {
-        const { data: topup } = await supabase
+        const { data: topup } = await (supabase as any)
           .from('wallet_topups')
           .select('*')
-          .eq('paystack_reference', ref)
+          .eq('squad_reference', ref)
           .maybeSingle();
 
         if (topup) {
@@ -45,10 +45,10 @@ export default function PaymentCallback() {
             setMessage('Deposit is being processed. Please wait...');
             
             const pollInterval = setInterval(async () => {
-              const { data: updated } = await supabase
+              const { data: updated } = await (supabase as any)
                 .from('wallet_topups')
                 .select('status, amount_kobo')
-                .eq('paystack_reference', ref)
+                .eq('squad_reference', ref)
                 .single();
               
               if (updated?.status === 'success') {
@@ -64,10 +64,10 @@ export default function PaymentCallback() {
           return;
         }
 
-        const { data: escrow, error } = await supabase
+        const { data: escrow, error } = await (supabase as any)
           .from('escrow_transactions')
           .select('*, tasks!escrow_transactions_task_id_fkey(title)')
-          .eq('paystack_reference', ref)
+          .eq('squad_reference', ref)
           .single();
 
         if (error || !escrow) {
@@ -87,7 +87,7 @@ export default function PaymentCallback() {
           setMessage('Payment is being processed. Please wait a moment...');
           // Poll for status update
           const interval = setInterval(async () => {
-            const { data: updated } = await supabase
+            const { data: updated } = await (supabase as any)
               .from('escrow_transactions')
               .select('status')
               .eq('id', escrow.id)
