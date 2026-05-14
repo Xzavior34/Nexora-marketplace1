@@ -1728,6 +1728,10 @@ export type Database = {
         Args: { p_admin_notes?: string; p_request_id: string }
         Returns: Json
       }
+      release_escrow_atomic: {
+        Args: { p_action: string; p_caller: string; p_escrow_id: string }
+        Returns: Json
+      }
       release_product_escrow: {
         Args: { p_buyer_id: string; p_product_id: string }
         Returns: Json
