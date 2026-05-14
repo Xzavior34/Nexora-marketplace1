@@ -1496,10 +1496,58 @@ export type Database = {
         Args: { p_buyer_id: string; p_product_id: string; p_reason: string }
         Returns: Json
       }
+      ensure_profile_for_user: {
+        Args: { _email?: string; _full_name?: string; _user_id: string }
+        Returns: {
+          account_name: string | null
+          account_number: string | null
+          auto_save_percentage: number
+          avatar_url: string | null
+          average_rating: number | null
+          bank_name: string | null
+          bio: string | null
+          completed_gigs: number | null
+          created_at: string
+          email: string
+          fake_completed_gigs: number | null
+          fake_posted_gigs: number | null
+          fake_reviews: number | null
+          full_name: string | null
+          has_completed_onboarding: boolean
+          has_edited_referral: boolean | null
+          id: string
+          intro_video_url: string | null
+          is_admin: boolean | null
+          is_ambassador: boolean
+          is_verified: boolean
+          last_seen_at: string | null
+          phone: string | null
+          recipient_code: string | null
+          referral_code: string | null
+          referred_by: string | null
+          skills: string[] | null
+          spin_tickets: number | null
+          university: string | null
+          updated_at: string
+          vault_balance: number
+          verification_code: string | null
+          verification_expires_at: string | null
+          virtual_account_number: string | null
+          virtual_bank_name: string | null
+          wallet_balance: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "profiles"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       freeze_poster_funds: {
         Args: { p_poster_id: string; p_reporter_id: string; p_task_id: string }
         Returns: Json
       }
+      generate_referral_code: { Args: { _user_id: string }; Returns: string }
       get_my_profile: {
         Args: never
         Returns: {
