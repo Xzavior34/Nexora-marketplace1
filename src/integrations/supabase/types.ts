@@ -222,6 +222,48 @@ export type Database = {
           },
         ]
       }
+      escrow_state_log: {
+        Row: {
+          amount_kobo: number | null
+          changed_at: string
+          escrow_id: string
+          id: string
+          new_status: string
+          old_status: string | null
+          payee_id: string | null
+          payer_id: string | null
+          reference: string | null
+          task_id: string | null
+          wallet_transaction_id: string | null
+        }
+        Insert: {
+          amount_kobo?: number | null
+          changed_at?: string
+          escrow_id: string
+          id?: string
+          new_status: string
+          old_status?: string | null
+          payee_id?: string | null
+          payer_id?: string | null
+          reference?: string | null
+          task_id?: string | null
+          wallet_transaction_id?: string | null
+        }
+        Update: {
+          amount_kobo?: number | null
+          changed_at?: string
+          escrow_id?: string
+          id?: string
+          new_status?: string
+          old_status?: string | null
+          payee_id?: string | null
+          payer_id?: string | null
+          reference?: string | null
+          task_id?: string | null
+          wallet_transaction_id?: string | null
+        }
+        Relationships: []
+      }
       escrow_transactions: {
         Row: {
           amount: number | null

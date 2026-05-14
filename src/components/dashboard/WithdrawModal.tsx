@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { Loader2, CheckCircle2, AlertCircle, Wallet } from 'lucide-react';
+import { mapSquadError } from '@/lib/squadErrors';
 
 interface Bank {
   name: string;
@@ -129,7 +130,7 @@ export default function WithdrawModal({ open, onClose, balance, profile, onSucce
       const isSuccess = data?.success || data?.status === 'success' || data?.status === 200;
 
       if (error || !isSuccess) {
-        toast.error(data?.message || data?.error || 'Could not verify account');
+        toast.error(mapSquadError(data, 'Could not verify account'));
         return;
       }
 
@@ -206,12 +207,13 @@ export default function WithdrawModal({ open, onClose, balance, profile, onSucce
 
       if (error) {
         console.error('Withdrawal error:', error);
-        throw new Error(error.message || 'Withdrawal failed');
+        toast.error(mapSquadError({ error_code: 'RPC_ERROR', message: error.message }, 'Withdrawal failed'));
+        return;
       }
 
-      const result = data as { success: boolean; error?: string; new_balance?: number };
+      const result = data as { success: boolean; error?: string; error_code?: string; req_id?: string; new_balance?: number };
       if (!result?.success) {
-        toast.error(result?.error || 'Withdrawal failed');
+        toast.error(mapSquadError(result, 'Withdrawal failed'));
         return;
       }
 
@@ -227,7 +229,7 @@ export default function WithdrawModal({ open, onClose, balance, profile, onSucce
       onSuccess();
     } catch (err: any) {
       console.error('Withdrawal error:', err);
-      toast.error(err.message || 'Withdrawal failed');
+      toast.error(mapSquadError({ message: err?.message }, 'Withdrawal failed'));
     } finally {
       setIsSubmitting(false);
     }

@@ -26,6 +26,7 @@ import AdminPayouts from "./pages/AdminPayouts";
 import AdminWithdrawals from "./pages/AdminWithdrawals";
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminMonitoring from "./pages/AdminMonitoring";
+import AdminEscrowAudit from "./pages/AdminEscrowAudit";
 import Messages from "./pages/Messages";
 import VerifyEmail from "./pages/VerifyEmail";
 import Terms from "./pages/Terms";
@@ -85,6 +86,7 @@ const App = () => (
               <Route path="/admin/withdrawals" element={<AdminWithdrawals />} />
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/admin/monitoring" element={<AdminMonitoring />} />
+              <Route path="/admin/escrow-audit" element={<AdminEscrowAudit />} />
               <Route path="/messages" element={<Messages />} />
               <Route path="/verify-email" element={<VerifyEmail />} />
               <Route path="/terms" element={<Terms />} />
