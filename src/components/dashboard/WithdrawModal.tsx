@@ -130,7 +130,7 @@ export default function WithdrawModal({ open, onClose, balance, profile, onSucce
       const isSuccess = data?.success || data?.status === 'success' || data?.status === 200;
 
       if (error || !isSuccess) {
-        toast.error(data?.message || data?.error || 'Could not verify account');
+        toast.error(mapSquadError(data, 'Could not verify account'));
         return;
       }
 
