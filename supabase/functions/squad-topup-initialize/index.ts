@@ -66,7 +66,7 @@ serve(async (req) => {
         initiate_type: "inline",
         transaction_ref,
         callback_url: `${origin}/payment/callback`,
-        customer_name: user.user_metadata?.full_name || "UniGig User",
+        customer_name: user.user_metadata?.full_name || "Nexora User",
       }),
     });
 
@@ -83,7 +83,7 @@ serve(async (req) => {
     await supabase.from("wallet_topups").insert({
       user_id: user.id,
       amount_kobo,
-      paystack_reference: transaction_ref, // reuse column for ref tracking
+      squad_reference: transaction_ref,
       status: "pending",
     });
 
@@ -97,8 +97,8 @@ serve(async (req) => {
     });
   } catch (err) {
     console.error("squad-topup-initialize error:", err);
-    return new Response(JSON.stringify({ error: (err as Error).message }), {
-      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    return new Response(JSON.stringify({ error: "Squad deposit initialization failed", detail: (err as Error).message, error_code: "SQUAD_TOPUP_FAILED" }), {
+      status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });
