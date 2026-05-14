@@ -329,6 +329,39 @@ export type Database = {
           },
         ]
       }
+      loans: {
+        Row: {
+          amount_kobo: number
+          created_at: string
+          eligibility_score: number
+          id: string
+          reason: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_kobo: number
+          created_at?: string
+          eligibility_score?: number
+          id?: string
+          reason?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_kobo?: number
+          created_at?: string
+          eligibility_score?: number
+          id?: string
+          reason?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       messages: {
         Row: {
           application_id: string | null
@@ -1690,6 +1723,7 @@ export type Database = {
         Args: { p_buyer_id: string; p_product_id: string; p_seller_id: string }
         Returns: Json
       }
+      quick_ai_credit_scan: { Args: { _user_id?: string }; Returns: Json }
       refund_withdrawal: {
         Args: { p_admin_notes?: string; p_request_id: string }
         Returns: Json
