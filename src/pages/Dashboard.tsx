@@ -379,7 +379,9 @@ export default function Dashboard() {
 
             {/* ── Transactions ── */}
             <motion.div variants={sectionVariant}>
-              <TransactionList userId={user?.id || ''} />
+              <ErrorBoundary fallbackTitle="Transactions unavailable">
+                <TransactionList userId={user?.id || ''} />
+              </ErrorBoundary>
             </motion.div>
 
           </motion.div>
