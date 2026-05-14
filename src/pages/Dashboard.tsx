@@ -297,48 +297,62 @@ export default function Dashboard() {
             {/* ── Vault + MicroLoan Row ── */}
             {user?.id && (
               <motion.div variants={sectionVariant} className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <VaultCard
-                  userId={user.id}
-                  vaultBalance={(profile as any).vault_balance ?? 0}
-                  autoSavePercentage={(profile as any).auto_save_percentage ?? 5}
-                  walletBalance={profile.wallet_balance}
-                  onChanged={refreshProfile}
-                />
-                <MicroLoanCard
-                  userId={user.id}
-                  vaultBalance={(profile as any).vault_balance ?? 0}
-                  onChanged={refreshProfile}
-                />
+                <ErrorBoundary fallbackTitle="Vault unavailable">
+                  <VaultCard
+                    userId={user.id}
+                    vaultBalance={(profile as any).vault_balance ?? 0}
+                    autoSavePercentage={(profile as any).auto_save_percentage ?? 5}
+                    walletBalance={profile.wallet_balance}
+                    onChanged={refreshProfile}
+                  />
+                </ErrorBoundary>
+                <ErrorBoundary fallbackTitle="Loan card unavailable">
+                  <MicroLoanCard
+                    userId={user.id}
+                    vaultBalance={(profile as any).vault_balance ?? 0}
+                    onChanged={refreshProfile}
+                  />
+                </ErrorBoundary>
               </motion.div>
             )}
 
             {/* ── AI Financial Distress Detection ── */}
             {user?.id && (
               <motion.div variants={sectionVariant}>
-                <FinancialDistressCard userId={user.id} />
+                <ErrorBoundary fallbackTitle="Wellness check paused">
+                  <FinancialDistressCard userId={user.id} />
+                </ErrorBoundary>
               </motion.div>
             )}
 
             {/* ── Daily Streak ── */}
             <motion.div variants={sectionVariant}>
-              <DailyStreak />
+              <ErrorBoundary fallbackTitle="Streak unavailable">
+                <DailyStreak />
+              </ErrorBoundary>
             </motion.div>
 
             {/* ── AI Smart Match Feed (hero placement) ── */}
             <motion.div variants={sectionVariant}>
-              {user?.id && <SmartMatchFeed userId={user.id} />}
+              <ErrorBoundary fallbackTitle="Smart matches paused">
+                {user?.id && <SmartMatchFeed userId={user.id} />}
+              </ErrorBoundary>
             </motion.div>
 
             {/* ── Active Gigs ── */}
             <motion.div variants={sectionVariant}>
-              <ActiveGigs userId={user?.id || ''} />
+              <ErrorBoundary fallbackTitle="Active gigs unavailable">
+                <ActiveGigs userId={user?.id || ''} />
+              </ErrorBoundary>
             </motion.div>
 
             {/* ── Saved Gigs ── */}
             <motion.div variants={sectionVariant}>
               <section className="space-y-2">
                 <h2 className="text-base font-semibold text-foreground">Saved gigs</h2>
-                <SavedGigs />
+                <ErrorBoundary fallbackTitle="Saved gigs unavailable">
+                  <SavedGigs />
+                </ErrorBoundary>
               </section>
             </motion.div>
 
