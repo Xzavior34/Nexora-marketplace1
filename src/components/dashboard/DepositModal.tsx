@@ -12,7 +12,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { ArrowDownLeft, Loader2, Wallet, Banknote } from 'lucide-react';
+import { ArrowDownLeft, Loader2, Wallet, Banknote, Copy, Sparkles } from 'lucide-react';
+import { mapSquadError } from '@/lib/squadErrors';
 
 interface DepositModalProps {
   open: boolean;
