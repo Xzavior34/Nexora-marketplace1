@@ -38,7 +38,7 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
   if (
     url.hostname.includes('supabase') ||
-    url.hostname.includes('paystack') ||
+    url.hostname.includes('squadco') ||
     url.hostname.includes('resend')
   ) {
     return;
