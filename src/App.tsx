@@ -86,6 +86,7 @@ const App = () => (
               <Route path="/admin/withdrawals" element={<AdminWithdrawals />} />
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/admin/monitoring" element={<AdminMonitoring />} />
+              <Route path="/admin/escrow-audit" element={<AdminEscrowAudit />} />
               <Route path="/messages" element={<Messages />} />
               <Route path="/verify-email" element={<VerifyEmail />} />
               <Route path="/terms" element={<Terms />} />
