@@ -43,12 +43,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchProfile = async (_userId: string) => {
-    // Use secure RPC so the caller only ever gets their own full row
-    const { data, error } = await supabase.rpc('get_my_profile');
+  const fetchProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase.rpc('get_my_profile');
+      if (!error && data && data.length > 0) {
+        setProfile(data[0] as Profile);
+        return;
+      }
+      if (error) console.error('[useAuth] get_my_profile failed:', error.message);
 
-    if (!error && data && data.length > 0) {
-      setProfile(data[0] as Profile);
+      // Fallback: try direct table read so the dashboard isn't stuck
+      const { data: row, error: rowErr } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .maybeSingle();
+      if (rowErr) console.error('[useAuth] profiles fallback failed:', rowErr.message);
+      if (row) setProfile(row as unknown as Profile);
+    } catch (e: any) {
+      console.error('[useAuth] fetchProfile exception:', e?.message || e);
     }
   };
 

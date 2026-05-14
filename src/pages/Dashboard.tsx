@@ -163,7 +163,7 @@ export default function Dashboard() {
   const formatNaira = (kobo: number) =>
     new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 0 }).format(kobo / 100);
 
-  if (loading || !profile) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-background">
         <div className="container max-w-5xl py-8 space-y-4">
@@ -171,6 +171,31 @@ export default function Dashboard() {
           <Skeleton className="h-44 w-full rounded-2xl" />
           <div className="grid grid-cols-3 gap-3"><Skeleton className="h-24 rounded-2xl" /><Skeleton className="h-24 rounded-2xl" /><Skeleton className="h-24 rounded-2xl" /></div>
           <Skeleton className="h-56 w-full rounded-2xl" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center px-4">
+        <div className="glass-card max-w-md w-full p-6 text-center space-y-4">
+          <div className="mx-auto h-12 w-12 rounded-full bg-amber-500/15 flex items-center justify-center">
+            <RefreshCw className="h-6 w-6 text-amber-500" />
+          </div>
+          <div className="space-y-1">
+            <h2 className="text-lg font-semibold text-foreground">Loading your profile…</h2>
+            <p className="text-sm text-muted-foreground">
+              We couldn't fetch your profile yet. Try reloading — your data is safe.
+            </p>
+          </div>
+          <div className="flex gap-2 justify-center">
+            <Button variant="outline" onClick={refreshProfile}>
+              Retry
+            </Button>
+            <Button onClick={() => window.location.reload()}>Reload</Button>
+            <Button variant="ghost" onClick={signOut}>Sign out</Button>
+          </div>
         </div>
       </div>
     );
