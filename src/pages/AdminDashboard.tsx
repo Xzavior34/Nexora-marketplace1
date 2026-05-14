@@ -435,6 +435,7 @@ const handleDeleteUser = async (targetId: string, email: string) => {
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
           <Button variant="outline" size="sm" onClick={() => navigate("/admin/monitoring")} className="px-2 sm:px-3"><ShieldCheck className="h-4 w-4 sm:mr-1.5" /><span className="hidden sm:inline">Monitor</span></Button>
+          <Button variant="outline" size="sm" onClick={() => navigate("/admin/escrow-audit")} className="px-2 sm:px-3"><FileText className="h-4 w-4 sm:mr-1.5" /><span className="hidden sm:inline">Escrow</span></Button>
           <Button variant="outline" size="sm" onClick={fetchData} className="px-2 sm:px-3"><RefreshCw className={`h-4 w-4 sm:mr-1.5 ${loading ? "animate-spin" : ""}`} /><span className="hidden sm:inline">Sync</span></Button>
         </div>
       </header>
