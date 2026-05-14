@@ -25,13 +25,21 @@ Deno.serve(async (req) => {
       return respond(503, { error: "Squad credentials not configured", error_code: "NO_SQUAD_KEY", req_id });
     }
 
-    const res = await fetch(`${SQUAD_BASE}/payout/banks`, {
-      headers: { Authorization: `Bearer ${secret}` },
-    });
-    const data = await res.json().catch(() => ({}));
+    // Try /payout/banks first, fall back to /transaction/banks for older accounts.
+    const tryFetch = async (path: string) => {
+      const r = await fetch(`${SQUAD_BASE}${path}`, { headers: { Authorization: `Bearer ${secret}` } });
+      const d = await r.json().catch(() => ({}));
+      return { r, d, path };
+    };
+    let { r: res, d: data, path: usedPath } = await tryFetch("/payout/banks");
     if (!res.ok || !data?.data) {
-      log(req_id, "SQUAD_ERROR", "non-2xx", { status: res.status });
-      return respond(502, { error: "Failed to fetch banks", error_code: "SQUAD_ERROR", upstream_status: res.status, req_id });
+      log(req_id, "FALLBACK", "primary path failed, trying fallback", { primary: "/payout/banks", primary_status: res.status, primary_msg: data?.message });
+      const fb = await tryFetch("/transaction/banks");
+      res = fb.r; data = fb.d; usedPath = fb.path;
+    }
+    if (!res.ok || !data?.data) {
+      log(req_id, "SQUAD_ERROR", "all paths failed", { status: res.status, msg: data?.message, path: usedPath });
+      return respond(502, { error: "Failed to fetch banks", error_code: "SQUAD_ERROR", upstream_status: res.status, upstream_message: data?.message, req_id });
     }
     const banks = data.data.map((b: any) => ({
       name: b.bank_name || b.name,
