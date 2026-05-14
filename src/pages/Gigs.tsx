@@ -26,20 +26,20 @@ import {
   User,
   Plus,
   Loader2,
-  GraduationCap,
   Check,
+  Sparkles,
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { NIGERIAN_UNIVERSITIES } from '@/lib/nigerianUniversities';
 import { motion } from 'framer-motion';
 
 const CATEGORIES = [
   'All Categories',
-  'Laundry',
-  'Food Delivery',
-  'Assignment Help',
-  'Tutoring',
-  'Errands',
+  'Design',
+  'Web & Tech',
+  'Writing',
+  'Marketing',
+  'Logistics',
+  'Business Support',
   'Tech Support',
   'Photography',
   'Other',
@@ -57,12 +57,30 @@ interface Task {
   poster_id: string;
   assignee_id: string | null;
   created_at: string;
+  ai_match_score?: number;
+  match_reasons?: string[];
   poster?: {
     full_name: string | null;
     avatar_url: string | null;
-    university: string | null;
   };
 }
+
+const normalize = (value: string) => value.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+
+const computeAiMatchScore = (task: Task, skills: string[], selectedCategory: string) => {
+  const haystack = normalize(`${task.title} ${task.description} ${task.category}`);
+  const normalizedSkills = skills.map(normalize).filter(Boolean);
+  const matchedSkills = normalizedSkills.filter(skill => haystack.includes(skill));
+  const categoryMatch = selectedCategory !== 'All Categories' || normalizedSkills.some(skill => normalize(task.category).includes(skill));
+  const freshnessBoost = Math.max(0, 15 - Math.floor((Date.now() - new Date(task.created_at).getTime()) / 86_400_000));
+  const score = Math.min(99, 35 + matchedSkills.length * 18 + (categoryMatch ? 22 : 0) + freshnessBoost);
+  const reasons = [
+    ...matchedSkills.slice(0, 2).map(skill => `Skill: ${skill}`),
+    categoryMatch ? `Category: ${task.category}` : '',
+    freshnessBoost >= 10 ? 'Fresh gig' : '',
+  ].filter(Boolean);
+  return { score, reasons };
+};
 
 export default function Gigs() {
   const navigate = useNavigate();
@@ -72,9 +90,20 @@ export default function Gigs() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All Categories');
-  const [selectedUniversity, setSelectedUniversity] = useState('All Regions');
+  const [selectedRegion, setSelectedRegion] = useState('All Regions');
+  const [profileSkills, setProfileSkills] = useState<string[]>([]);
   const [applying, setApplying] = useState<string | null>(null);
   const [appliedGigIds, setAppliedGigIds] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (!user) { setProfileSkills([]); return; }
+    supabase
+      .from('profiles')
+      .select('skills')
+      .eq('id', user.id)
+      .single()
+      .then(({ data }) => setProfileSkills(Array.isArray((data as any)?.skills) ? (data as any).skills : []));
+  }, [user?.id]);
 
   // Fetch user's existing applications on mount
   useEffect(() => {
@@ -98,7 +127,7 @@ export default function Gigs() {
       .from('tasks')
       .select(`
         *,
-        poster:profiles!tasks_poster_id_fkey(full_name, avatar_url, university)
+        poster:profiles!tasks_poster_id_fkey(full_name, avatar_url)
       `)
       .eq('status', 'open')
       .order('created_at', { ascending: false });
@@ -114,13 +143,17 @@ export default function Gigs() {
     const { data, error } = await query;
 
     if (!error && data) {
-      let filteredData = data as Task[];
-      if (selectedUniversity !== 'All Regions') {
-        filteredData = filteredData.filter(task => 
-          task.poster?.university === selectedUniversity
-        );
+      let filteredData = (data as Task[]).map(task => {
+        const match = computeAiMatchScore(task, profileSkills, selectedCategory);
+        return { ...task, ai_match_score: match.score, match_reasons: match.reasons };
+      });
+      if (selectedRegion !== 'All Regions') {
+        filteredData = filteredData.filter(task => task.location?.toLowerCase().includes(selectedRegion.toLowerCase()));
       }
-      setTasks(filteredData);
+      if (profileSkills.length > 0 && selectedCategory === 'All Categories' && !searchQuery) {
+        filteredData = filteredData.filter(task => (task.ai_match_score ?? 0) >= 50);
+      }
+      setTasks(filteredData.sort((a, b) => (b.ai_match_score ?? 0) - (a.ai_match_score ?? 0)));
     } else {
       console.error('Error fetching tasks:', error);
     }
@@ -129,7 +162,7 @@ export default function Gigs() {
 
   useEffect(() => {
     fetchTasks();
-  }, [selectedCategory, searchQuery, selectedUniversity]);
+  }, [selectedCategory, searchQuery, selectedRegion, profileSkills.join('|')]);
 
   // Real-time subscription
   useEffect(() => {
@@ -145,7 +178,7 @@ export default function Gigs() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [selectedCategory, searchQuery, selectedUniversity]);
+    }, [selectedCategory, searchQuery, selectedRegion, profileSkills.join('|')]);
 
   const handleApply = async (task: Task) => {
     if (!user) {
