@@ -129,8 +129,47 @@ export default function DepositModal({ open, onClose }: DepositModalProps) {
         </DialogHeader>
 
         <div className="space-y-4 py-2">
+          {/* Squad Virtual Account card */}
+          {(authProfile as any)?.virtual_account_number ? (
+            <div className="rounded-lg border border-primary/30 bg-gradient-to-br from-primary/10 to-accent/5 p-3 space-y-1">
+              <p className="text-[10px] uppercase tracking-widest text-muted-foreground flex items-center gap-1">
+                <Sparkles className="h-3 w-3" /> Your dedicated Squad NUBAN
+              </p>
+              <div className="flex items-center justify-between">
+                <span className="font-mono text-lg font-bold text-foreground select-all">
+                  {(authProfile as any).virtual_account_number}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7"
+                  onClick={() => {
+                    navigator.clipboard.writeText((authProfile as any).virtual_account_number);
+                    toast.success('Account number copied');
+                  }}
+                >
+                  <Copy className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">{(authProfile as any).virtual_bank_name || 'Squad Virtual Bank'}</p>
+              <p className="text-[10px] text-muted-foreground pt-1">
+                Transfer any amount here — your wallet credits automatically.
+              </p>
+            </div>
+          ) : (
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={provisionDedicatedAccount}
+              disabled={provisioning}
+            >
+              {provisioning ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Banknote className="h-4 w-4 mr-2" />}
+              Provision dedicated Squad account
+            </Button>
+          )}
+
           <div className="space-y-2">
-            <Label>Amount (₦)</Label>
+            <Label>Or pay by card / bank — Amount (₦)</Label>
             <Input
               type="number"
               min={100}
