@@ -1,155 +1,120 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8";
+import { createClient } from 'npm:@supabase/supabase-js@2.89.0';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-squad-signature, x-squad-signature-256, x-request-id',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Max-Age': '86400',
 };
 
-serve(async (req) => {
-  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
+const FN = 'squad-webhook';
+const rid = () => crypto.randomUUID().slice(0, 8);
+const json = (status: number, body: Record<string, unknown>) => new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+const log = (req_id: string, level: 'info' | 'warn' | 'error', code: string, msg: string, extra: Record<string, unknown> = {}) => console[level](JSON.stringify({ fn: FN, req_id, code, msg, ...extra, ts: new Date().toISOString() }));
 
-  const supabase = createClient(
-    Deno.env.get('SUPABASE_URL')!,
-    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-  );
+const timingSafeEqual = (a: string, b: string) => {
+  const enc = new TextEncoder();
+  const aa = enc.encode(a); const bb = enc.encode(b);
+  if (aa.length !== bb.length) return false;
+  let out = 0;
+  for (let i = 0; i < aa.length; i++) out |= aa[i] ^ bb[i];
+  return out === 0;
+};
+
+async function hmacHex(secret: string, body: string) {
+  const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(body));
+  return Array.from(new Uint8Array(sig)).map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function verifyWebhook(req: Request, rawBody: string) {
+  const configuredSecret = Deno.env.get('SQUAD_WEBHOOK_SECRET');
+  if (!configuredSecret) return { ok: true, mode: 'not_configured' };
+  const header = req.headers.get('x-squad-signature-256') || req.headers.get('x-squad-signature') || req.headers.get('x-signature');
+  if (!header) return { ok: false, mode: 'missing_signature' };
+  const expected = await hmacHex(configuredSecret, rawBody);
+  const got = header.replace(/^sha256=/i, '').trim();
+  return { ok: timingSafeEqual(expected, got), mode: 'hmac_sha256' };
+}
+
+const normalizeAmount = (value: unknown) => {
+  const n = Number(value);
+  return Number.isFinite(n) && n > 0 ? Math.round(n) : 0;
+};
+
+Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
+  const req_id = req.headers.get('x-request-id') || rid();
+  const started = Date.now();
 
   try {
-    const payload = await req.json();
-    console.log("Squad Webhook payload received:", JSON.stringify(payload));
+    if (req.method !== 'POST') return json(405, { status: 'ignored', error_code: 'METHOD_NOT_ALLOWED', req_id });
 
-    const eventType = payload?.Event || payload?.event;
-    const bodyData = payload?.Body || payload?.data;
+    const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
+    const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    if (!SUPABASE_URL || !SERVICE_KEY) return json(503, { status: 'ignored', error_code: 'NO_CONFIG', req_id });
 
-    if (eventType === 'charge_successful') {
-      const transactionRef = bodyData?.transaction_ref || bodyData?.reference;
-      const settledAmountKobo = Number(bodyData?.transaction_amount || bodyData?.amount);
-
-      // Scenario 1: Inline Gateway Payments (has transactionRef)
-      if (transactionRef) {
-        console.log(`Processing inline gateway transaction: ${transactionRef}, amount: ${settledAmountKobo}`);
-
-        // 1A) Wallet topups (initiated via squad-topup-initialize)
-        if (transactionRef.startsWith('SQUAD_TOPUP_')) {
-          const { data: topup } = await supabase
-            .from("wallet_topups")
-            .select("*")
-            .eq("squad_reference", transactionRef)
-            .maybeSingle();
-
-          if (topup && topup.status !== 'success') {
-            // Atomically increment wallet balance
-            const { error: ledgerErr } = await supabase.rpc('increment_wallet_balance', {
-              p_user_id: topup.user_id,
-              p_amount_kobo: topup.amount_kobo
-            });
-
-            if (ledgerErr) {
-              const { data: userProfile } = await supabase
-                .from('profiles')
-                .select('wallet_balance')
-                .eq('id', topup.user_id)
-                .single();
-
-              const currentBal = Number(userProfile?.wallet_balance) || 0;
-              await supabase
-                .from('profiles')
-                .update({ wallet_balance: currentBal + topup.amount_kobo })
-                .eq('id', topup.user_id);
-            }
-
-            // Record wallet transaction
-            await supabase.from('wallet_transactions').insert({
-              user_id: topup.user_id,
-              type: 'deposit',
-              amount_kobo: topup.amount_kobo,
-              reference: transactionRef,
-              description: `Online wallet deposit of ₦${(topup.amount_kobo / 100).toLocaleString()} via Squad`
-            });
-
-            // Mark topup as success
-            await supabase
-              .from("wallet_topups")
-              .update({ status: "success" })
-              .eq("id", topup.id);
-
-            console.log(`Wallet topup ${topup.id} successfully settled.`);
-          }
-        } 
-        // 1B) Escrow funding (initiated via squad-initialize)
-        else if (transactionRef.startsWith('SQUAD_ESCROW_')) {
-          const { data: escrow } = await supabase
-            .from("escrow_transactions")
-            .select("*")
-            .eq("squad_reference", transactionRef)
-            .maybeSingle();
-
-          if (escrow && escrow.status === 'pending') {
-            // Lock escrow status to held
-            await supabase
-              .from("escrow_transactions")
-              .update({ status: "held" })
-              .eq("id", escrow.id);
-
-            // Assign the gig task and advance state
-            await supabase
-              .from("tasks")
-              .update({ status: "assigned", assignee_id: escrow.payee_id })
-              .eq("id", escrow.task_id);
-
-            console.log(`Escrow transaction ${escrow.id} set to held, task assigned.`);
-          }
-        }
-      } 
-      // Scenario 2: Direct static GTBank virtual account transfers (identified by customer_identifier/UUID)
-      else {
-        const customerRef = bodyData?.customer_identifier;
-        if (customerRef && settledAmountKobo > 0) {
-          console.log(`Processing direct virtual account settlement for user: ${customerRef}, amount: ${settledAmountKobo}`);
-
-          // Execute atomic balance increment
-          const { error: ledgerErr } = await supabase.rpc('increment_wallet_balance', {
-            p_user_id: customerRef,
-            p_amount_kobo: settledAmountKobo
-          });
-
-          if (ledgerErr) {
-            const { data: userProfile } = await supabase
-              .from('profiles')
-              .select('wallet_balance')
-              .eq('id', customerRef)
-              .single();
-
-            const currentBal = Number(userProfile?.wallet_balance) || 0;
-            await supabase
-              .from('profiles')
-              .update({ wallet_balance: currentBal + settledAmountKobo })
-              .eq('id', customerRef);
-          }
-
-          // Log transaction metrics securely
-          await supabase.from('wallet_transactions').insert({
-            user_id: customerRef,
-            type: 'deposit',
-            amount_kobo: settledAmountKobo,
-            status: 'success',
-            description: `Virtual Account Inbound Settlement: ${bodyData?.bank_transfer_ref || 'Squad GTBank transfer'}`
-          });
-
-          console.log(`Virtual account settlement for user ${customerRef} complete.`);
-        }
-      }
+    const rawBody = await req.text();
+    const verification = await verifyWebhook(req, rawBody);
+    if (!verification.ok) {
+      log(req_id, 'warn', 'BAD_SIGNATURE', 'Webhook signature rejected', { mode: verification.mode });
+      return json(401, { status: 'rejected', error_code: 'BAD_SIGNATURE', req_id });
     }
 
-    return new Response(JSON.stringify({ status: 'processed' }), { 
-      status: 200, 
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-    });
-  } catch (err: any) {
-    console.error("Webhook processing failure:", err.message);
-    return new Response(JSON.stringify({ error: 'Webhook ingestion error', message: err.message, error_code: 'SQUAD_WEBHOOK_FAILED' }), { 
-      status: 200, 
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-    });
+    const payload = JSON.parse(rawBody || '{}');
+    const eventType = String(payload?.Event || payload?.event || payload?.type || '').toLowerCase();
+    const bodyData = payload?.Body || payload?.data || payload?.body || {};
+    log(req_id, 'info', 'RECEIVED', 'Webhook received', { eventType, verification: verification.mode });
+
+    if (!['charge_successful', 'payment_successful', 'transaction_successful'].includes(eventType)) {
+      return json(200, { status: 'ignored', reason: 'non_success_event', req_id });
+    }
+
+    const supabase = createClient(SUPABASE_URL, SERVICE_KEY);
+    const transactionRef = String(bodyData?.transaction_ref || bodyData?.reference || bodyData?.transaction_reference || '').trim();
+    const amount = normalizeAmount(bodyData?.transaction_amount || bodyData?.amount || bodyData?.amount_kobo);
+
+    if (transactionRef.startsWith('SQUAD_TOPUP_')) {
+      const { data, error } = await supabase.rpc('process_squad_wallet_credit', {
+        p_reference: transactionRef,
+        p_user_id: null,
+        p_amount_kobo: null,
+        p_source: 'squad_checkout',
+        p_metadata: payload,
+      });
+      if (error) throw error;
+      return json(200, { status: 'processed', result: data, req_id });
+    }
+
+    if (transactionRef.startsWith('SQUAD_ESCROW_')) {
+      const { data: escrow, error: escErr } = await supabase.from('escrow_transactions').select('*').eq('squad_reference', transactionRef).maybeSingle();
+      if (escErr) throw escErr;
+      if (escrow?.status === 'pending') {
+        await supabase.from('escrow_transactions').update({ status: 'held' }).eq('id', escrow.id).eq('status', 'pending');
+        if (escrow.task_id) await supabase.from('tasks').update({ status: 'assigned', assignee_id: escrow.payee_id, worker_id: escrow.payee_id }).eq('id', escrow.task_id);
+      }
+      return json(200, { status: 'processed', idempotent: escrow?.status !== 'pending', req_id });
+    }
+
+    const customerRef = String(bodyData?.customer_identifier || bodyData?.customer_id || '').trim();
+    const bankRef = String(bodyData?.bank_transfer_ref || bodyData?.session_id || transactionRef || crypto.randomUUID()).trim();
+    if (customerRef && amount > 0) {
+      const reference = `SQUAD_VA_${bankRef}`;
+      const { data, error } = await supabase.rpc('process_squad_wallet_credit', {
+        p_reference: reference,
+        p_user_id: customerRef,
+        p_amount_kobo: amount,
+        p_source: 'virtual_account',
+        p_metadata: payload,
+      });
+      if (error) throw error;
+      return json(200, { status: 'processed', result: data, req_id });
+    }
+
+    log(req_id, 'warn', 'UNMATCHED_SUCCESS', 'Successful Squad event could not be matched', { duration_ms: Date.now() - started });
+    return json(200, { status: 'ignored', reason: 'unmatched_success_event', req_id });
+  } catch (err) {
+    log(req_id, 'error', 'WEBHOOK_FAILED', 'Webhook failed safely', { err: (err as Error).message, duration_ms: Date.now() - started });
+    return json(200, { status: 'accepted_for_retry', error_code: 'SQUAD_WEBHOOK_FAILED', req_id });
   }
 });
