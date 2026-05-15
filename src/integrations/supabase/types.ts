@@ -441,6 +441,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "messages_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "task_applications_with_poster"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "messages_recipient_id_fkey"
             columns: ["recipient_id"]
             isOneToOne: false
@@ -1428,6 +1435,53 @@ export type Database = {
         }
         Relationships: []
       }
+      task_applications_with_poster: {
+        Row: {
+          applicant_id: string | null
+          created_at: string | null
+          id: string | null
+          poster_id: string | null
+          status: string | null
+          task_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_applications_applicant_id_fkey"
+            columns: ["applicant_id"]
+            isOneToOne: false
+            referencedRelation: "leaderboard_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "task_applications_applicant_id_fkey"
+            columns: ["applicant_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "task_applications_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_poster_id_fkey"
+            columns: ["poster_id"]
+            isOneToOne: false
+            referencedRelation: "leaderboard_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_poster_id_fkey"
+            columns: ["poster_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       add_spin_ticket: { Args: { p_user_id: string }; Returns: undefined }
@@ -1615,6 +1669,10 @@ export type Database = {
       }
       get_squad_trust_score: { Args: { _user_id: string }; Returns: number }
       get_user_email_internal: { Args: { p_user_id: string }; Returns: string }
+      handle_squad_deposit: {
+        Args: { p_amount_kobo: number; p_reference: string; p_user_id: string }
+        Returns: Json
+      }
       hire_and_escrow: {
         Args: {
           p_application_id?: string
@@ -1870,6 +1928,7 @@ export type Database = {
         | "commission"
         | "withdrawal"
         | "refund"
+        | "payout"
     }
     CompositeTypes: {
       http_header: {
@@ -2029,6 +2088,7 @@ export const Constants = {
         "commission",
         "withdrawal",
         "refund",
+        "payout",
       ],
     },
   },
