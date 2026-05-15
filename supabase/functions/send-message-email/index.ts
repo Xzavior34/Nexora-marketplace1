@@ -212,7 +212,7 @@ serve(async (req) => {
         headers: { "Content-Type": "application/json", ...corsHeaders },
       }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error in send-message-email function:", error);
     return new Response(
       JSON.stringify({ error: error.message }),

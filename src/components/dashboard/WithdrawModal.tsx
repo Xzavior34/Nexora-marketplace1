@@ -66,8 +66,6 @@ export default function WithdrawModal({ open, onClose, balance, profile, onSucce
   const [selectedBank, setSelectedBank] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
   const [accountName, setAccountName] = useState('');
-  const [verifyingAccount, setVerifyingAccount] = useState(false);
-  const [accountVerified, setAccountVerified] = useState(false);
   const [withdrawAmount, setWithdrawAmount] = useState('');
 
   // Load saved bank details ONCE per modal open (prevents focus jump back to 'amount')
@@ -83,7 +81,6 @@ export default function WithdrawModal({ open, onClose, balance, profile, onSucce
       if (savedBank) setSelectedBank(savedBank.code);
       setAccountName(profile.account_name);
       setAccountNumber(profile.account_number);
-      setAccountVerified(true);
       setStep('amount');
       autoAdvancedRef.current = true;
     }
@@ -112,56 +109,11 @@ export default function WithdrawModal({ open, onClose, balance, profile, onSucce
     }
   };
 
-  const verifyBankAccount = async () => {
-    if (!selectedBank || accountNumber.length !== 10) {
-      toast.error('Please select a bank and enter a valid 10-digit account number');
-      return;
-    }
 
-    setVerifyingAccount(true);
-    setAccountName('');
-    setAccountVerified(false);
-
-    try {
-      const { data, error } = await supabase.functions.invoke('squad-account-lookup', {
-        body: { account_number: accountNumber.trim(), bank_code: selectedBank.trim() },
-      });
-
-      const isSuccess = data?.success || data?.status === 'success' || data?.status === 200;
-
-      if (error || !isSuccess) {
-        toast.error(mapSquadError(data, 'Could not verify account'));
-        return;
-      }
-
-      const resolvedName = data.data?.account_name || data?.account_name || '';
-      setAccountName(resolvedName);
-      setAccountVerified(true);
-      toast.success('Account verified!');
-
-      // Persist the pre-validated account details immediately to the database ledger
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const bankName = banks.find(b => b.code === selectedBank)?.name || '';
-        await supabase
-          .from('profiles')
-          .update({
-            account_number: accountNumber.trim(),
-            bank_name: bankName,
-            account_name: resolvedName,
-          })
-          .eq('id', user.id);
-      }
-    } catch (err) {
-      toast.error('Account verification failed');
-    } finally {
-      setVerifyingAccount(false);
-    }
-  };
 
   const handleProceedToAmount = () => {
-    if (!accountVerified) {
-      toast.error('Please verify your account first');
+    if (!selectedBank || accountNumber.length !== 10) {
+      toast.error('Please select a bank and enter a valid 10-digit account number');
       return;
     }
     setStep('amount');
@@ -250,7 +202,6 @@ export default function WithdrawModal({ open, onClose, balance, profile, onSucce
       setSelectedBank('');
       setAccountNumber('');
       setAccountName('');
-      setAccountVerified(false);
     }
     onClose();
   };
@@ -271,7 +222,6 @@ export default function WithdrawModal({ open, onClose, balance, profile, onSucce
                 <Label>Select Bank</Label>
                 <Select value={selectedBank} onValueChange={(val) => {
                   setSelectedBank(val || '');
-                  setAccountVerified(false);
                   setAccountName('');
                 }}>
                   <SelectTrigger>
@@ -297,7 +247,6 @@ export default function WithdrawModal({ open, onClose, balance, profile, onSucce
                   onChange={(e) => {
                     const val = e.target.value || '';
                     setAccountNumber(val.replace(/\D/g, ''));
-                    setAccountVerified(false);
                     setAccountName('');
                   }}
                 />
@@ -312,20 +261,8 @@ export default function WithdrawModal({ open, onClose, balance, profile, onSucce
 
               <div className="flex gap-2">
                 <Button
-                  variant="outline"
-                  onClick={verifyBankAccount}
-                  disabled={verifyingAccount || !selectedBank || accountNumber.length !== 10}
-                  className="flex-1"
-                >
-                  {verifyingAccount ? (
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  ) : null}
-                  Verify Account
-                </Button>
-                <Button
                   onClick={handleProceedToAmount}
-                  disabled={!accountVerified}
-                  className="flex-1"
+                  className="w-full"
                 >
                   Continue
                 </Button>

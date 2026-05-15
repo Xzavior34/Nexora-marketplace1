@@ -124,7 +124,11 @@ export default function Dashboard() {
   }, [user, profile, refreshProfile]);
 
   useEffect(() => {
-    if (user) { fetchStats(); fetchTotalActiveGigs(); }
+    if (user) { 
+      refreshProfile(); // Guarantee fresh wallet balance on mount
+      fetchStats(); 
+      fetchTotalActiveGigs(); 
+    }
   }, [user]);
 
   const fetchStats = async () => {

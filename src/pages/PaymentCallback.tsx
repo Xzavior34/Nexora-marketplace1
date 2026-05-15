@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader2, CheckCircle, XCircle } from 'lucide-react';
@@ -8,6 +9,7 @@ import { Loader2, CheckCircle, XCircle } from 'lucide-react';
 export default function PaymentCallback() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { refreshProfile } = useAuth();
   const [status, setStatus] = useState<'loading' | 'success' | 'failed'>('loading');
   const [message, setMessage] = useState('');
 
@@ -35,6 +37,7 @@ export default function PaymentCallback() {
 
         if (topup) {
           if (topup.status === 'success') {
+            await refreshProfile();
             setStatus('success');
             setMessage(`Deposit confirmed! Your wallet has been funded with ₦${((topup.amount_kobo || 0) / 100).toLocaleString()} via Squad.`);
           } else {
@@ -51,6 +54,7 @@ export default function PaymentCallback() {
               
               if (updated?.status === 'success') {
                 clearInterval(pollInterval);
+                await refreshProfile();
                 setMessage(`Deposit confirmed! Your wallet has been funded with ₦${((updated.amount_kobo || 0) / 100).toLocaleString()} via Squad.`);
               }
             }, 3000);

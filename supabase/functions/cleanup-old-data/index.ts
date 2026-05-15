@@ -146,7 +146,7 @@ serve(async (req) => {
         status: 200,
       }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Cleanup error:", error);
     return new Response(
       JSON.stringify({ success: false, error: error.message }),

@@ -98,7 +98,7 @@ serve(async (req) => {
     });
     const banksData = await banksResponse.json();
     
-    const bank = banksData.data?.find((b: any) => 
+    const bank = banksData.data?.find((b: { bank_name?: string; bank_code?: string; name?: string }) => 
       b.bank_name?.toLowerCase().includes(profile.bank_name.toLowerCase()) ||
       profile.bank_name.toLowerCase().includes(b.bank_name?.toLowerCase())
     );

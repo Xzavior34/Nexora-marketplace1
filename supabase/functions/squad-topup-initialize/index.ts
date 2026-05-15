@@ -1,5 +1,10 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.89.0';
 
+declare const Deno: {
+  env: { get(key: string): string | undefined; };
+  serve(handler: (req: Request) => Response | Promise<Response>): void;
+};
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-request-id',

@@ -1,5 +1,10 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.89.0';
 
+declare const Deno: {
+  env: { get(key: string): string | undefined; };
+  serve(handler: (req: Request) => Response | Promise<Response>): void;
+};
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-squad-signature, x-squad-signature-256, x-request-id',
@@ -64,6 +69,10 @@ Deno.serve(async (req) => {
     const payload = JSON.parse(rawBody || '{}');
     const eventType = String(payload?.Event || payload?.event || payload?.type || '').toLowerCase();
     const bodyData = payload?.Body || payload?.data || payload?.body || {};
+    
+    console.log("WEBHOOK HIT");
+    console.log("BODY:", JSON.stringify(payload));
+    
     log(req_id, 'info', 'RECEIVED', 'Webhook received', { eventType, verification: verification.mode });
 
     if (!['charge_successful', 'payment_successful', 'transaction_successful'].includes(eventType)) {
@@ -75,10 +84,14 @@ Deno.serve(async (req) => {
     const amount = normalizeAmount(bodyData?.transaction_amount || bodyData?.amount || bodyData?.amount_kobo);
 
     if (transactionRef.startsWith('SQUAD_TOPUP_')) {
+      // Extract user_id for backward compatibility with un-migrated DB
+      const parts = transactionRef.split('_');
+      const userId = (parts.length >= 3 && parts[2].length === 36) ? parts[2] : null;
+
       const { data, error } = await supabase.rpc('process_squad_wallet_credit', {
         p_reference: transactionRef,
-        p_user_id: null,
-        p_amount_kobo: null,
+        p_user_id: userId,
+        p_amount_kobo: amount > 0 ? amount : null,
         p_source: 'squad_checkout',
         p_metadata: payload,
       });

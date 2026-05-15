@@ -41,7 +41,7 @@ Deno.serve(async (req) => {
       log(req_id, "SQUAD_ERROR", "all paths failed", { status: res.status, msg: data?.message, path: usedPath });
       return respond(502, { error: "Failed to fetch banks", error_code: "SQUAD_ERROR", upstream_status: res.status, upstream_message: data?.message, req_id });
     }
-    const banks = data.data.map((b: any) => ({
+    const banks = data.data.map((b: { bank_name?: string; name?: string; bank_code?: string; code?: string }) => ({
       name: b.bank_name || b.name,
       code: b.bank_code || b.code,
     }));

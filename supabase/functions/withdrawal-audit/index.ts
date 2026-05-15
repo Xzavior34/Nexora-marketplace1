@@ -80,9 +80,9 @@ Deno.serve(async (req) => {
       account_age_days: Math.floor(
         (Date.now() - new Date(profile.created_at).getTime()) / 86_400_000,
       ),
-      disputes_against: disputesRes.data?.filter((d: any) => d.status !== "resolved").length ?? 0,
-      released_escrows: escrowRes.data?.filter((e: any) => e.status === "released").length ?? 0,
-      rejected_withdrawals: withdrawalsRes.data?.filter((w: any) => w.status === "rejected").length ?? 0,
+      disputes_against: disputesRes.data?.filter((d: Record<string, unknown>) => d.status !== "resolved").length ?? 0,
+      released_escrows: escrowRes.data?.filter((e: Record<string, unknown>) => e.status === "released").length ?? 0,
+      rejected_withdrawals: withdrawalsRes.data?.filter((w: Record<string, unknown>) => w.status === "rejected").length ?? 0,
       recent_tx_count: txRes.data?.length ?? 0,
     };
 
@@ -154,7 +154,7 @@ Heuristics: open disputes, rejected withdrawals, brand-new accounts (<3 days), o
     }
     const aiJson = await aiRes.json();
     const call = aiJson?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
-    let parsed: any = {};
+    let parsed: Record<string, unknown> = {};
     try { parsed = typeof call === "string" ? JSON.parse(call) : call; } catch { parsed = {}; }
 
     return new Response(JSON.stringify({

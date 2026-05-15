@@ -1,3 +1,10 @@
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+
+declare const Deno: {
+  env: { get(key: string): string | undefined; };
+  serve(handler: (req: Request) => Response | Promise<Response>): void;
+};
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-request-id',
@@ -62,7 +69,7 @@ async function callSquad(baseUrl: string, secret: string, payload: Record<string
   return last;
 }
 
-Deno.serve(async (req) => {
+serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   const req_id = req.headers.get('x-request-id') || rid();
   const started = Date.now();
@@ -75,12 +82,41 @@ Deno.serve(async (req) => {
     if (!baseUrl) return json(503, { error: 'Invalid Squad environment', error_code: 'BAD_SQUAD_ENV', req_id });
     if (!secret) return json(503, { error: 'Squad credentials not configured', error_code: 'NO_SQUAD_KEY', req_id });
 
-    const body = await req.json().catch(() => null) as { bank_code?: string; account_number?: string } | null;
-    const bank_code = String(body?.bank_code || '').trim();
-    const account_number = String(body?.account_number || '').trim();
-    if (!/^\d{2,10}$/.test(bank_code) || !/^\d{10}$/.test(account_number)) {
-      log(req_id, 'warn', 'BAD_INPUT', 'Invalid lookup payload');
-      return json(400, { error: 'Valid bank code and 10-digit account number are required', error_code: 'BAD_INPUT', req_id });
+    const rawBody = await req.text().catch(() => '');
+    console.log('RAW BODY RECEIVED:', rawBody);
+    
+    let body: Record<string, unknown> | null = null;
+    
+    try {
+      if (!rawBody) throw new Error('Empty body');
+      body = JSON.parse(rawBody);
+      console.log('PARSED JSON:', JSON.stringify(body));
+    } catch (e) {
+      console.error('JSON PARSE ERROR:', e);
+      log(req_id, 'warn', 'BAD_JSON', 'Malformed or empty JSON payload received');
+      return json(400, { error: 'Invalid JSON payload', error_code: 'BAD_JSON', req_id });
+    }
+
+    // Flexible payload extraction (handles raw payload, wrapped {body: {...}}, and camelCase)
+    const payloadData = body?.body && typeof body.body === 'object' ? (body.body as Record<string, unknown>) : body;
+    
+    const bank_code = String(
+      payloadData?.bank_code || payloadData?.bankCode || body?.bank_code || body?.bankCode || ''
+    ).trim();
+    
+    const account_number = String(
+      payloadData?.account_number || payloadData?.accountNumber || body?.account_number || body?.accountNumber || ''
+    ).trim();
+
+    if (!bank_code || !account_number) {
+      log(req_id, 'warn', 'MISSING_FIELDS', 'Required payload fields are missing', { body });
+      return json(400, { error: 'bank_code and account_number are strictly required', error_code: 'MISSING_FIELDS', req_id });
+    }
+
+    // STRICT VALIDATION: Squad API expects alphanumeric bank codes (2-10 chars) and exactly 10-digit account numbers
+    if (!/^[a-zA-Z0-9]{2,10}$/.test(bank_code) || !/^\d{10}$/.test(account_number)) {
+      log(req_id, 'warn', 'INVALID_FORMAT', 'Payload format mismatch', { bank_code, account_number });
+      return json(400, { error: 'Valid bank code and 10-digit account number are required', error_code: 'INVALID_FORMAT', req_id });
     }
 
     const result = await callSquad(baseUrl, secret, { bank_code, account_number }, req_id);
