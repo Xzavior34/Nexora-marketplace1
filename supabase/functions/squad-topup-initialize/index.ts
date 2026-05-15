@@ -1,104 +1,69 @@
-// Squad payment initialization for wallet topups
-// Docs: https://squadinc.gitbook.io/squad-api-documentation/payments/initiate-payment
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.89.0";
+import { createClient } from 'npm:@supabase/supabase-js@2.89.0';
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-request-id',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Max-Age': '86400',
 };
 
-// Toggle live vs sandbox via SQUAD_ENV secret ("live" | "sandbox"). Defaults to sandbox.
-const SQUAD_ENV = (Deno.env.get("SQUAD_ENV") || "sandbox").toLowerCase();
-const SQUAD_BASE = SQUAD_ENV === "live"
-  ? "https://api-d.squadco.com"
-  : "https://sandbox-api-d.squadco.com";
+const FN = 'squad-topup-initialize';
+const rid = () => crypto.randomUUID().slice(0, 8);
+const json = (status: number, body: Record<string, unknown>) => new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+const log = (req_id: string, level: 'info' | 'warn' | 'error', code: string, msg: string, extra: Record<string, unknown> = {}) => console[level](JSON.stringify({ fn: FN, req_id, code, msg, ...extra, ts: new Date().toISOString() }));
+const baseUrl = () => (Deno.env.get('SQUAD_ENV') || 'sandbox').toLowerCase() === 'live' ? 'https://api-d.squadco.com' : 'https://sandbox-api-d.squadco.com';
 
-serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+async function fetchWithTimeout(url: string, init: RequestInit, ms = 10000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort('timeout'), ms);
+  try { return await fetch(url, { ...init, signal: controller.signal }); } finally { clearTimeout(timer); }
+}
 
+Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
+  const req_id = req.headers.get('x-request-id') || rid();
+  const started = Date.now();
   try {
-    const SQUAD_SECRET_KEY = Deno.env.get("SQUAD_SECRET_KEY");
-    const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
-    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    if (!SQUAD_SECRET_KEY || !SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-      throw new Error("Server configuration error");
-    }
+    if (req.method !== 'POST') return json(405, { error: 'Method not allowed', error_code: 'METHOD_NOT_ALLOWED', req_id });
+    const SQUAD_SECRET_KEY = Deno.env.get('SQUAD_SECRET_KEY');
+    const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
+    const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    if (!SQUAD_SECRET_KEY || !SUPABASE_URL || !SERVICE_KEY) return json(503, { error: 'Payment gateway is not configured', error_code: 'NO_CONFIG', req_id });
 
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) return json(401, { error: 'Unauthorized', error_code: 'UNAUTHENTICATED', req_id });
 
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-    const { data: { user }, error: userError } = await supabase.auth.getUser(
-      authHeader.replace("Bearer ", "")
-    );
-    if (userError || !user) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    const supabase = createClient(SUPABASE_URL, SERVICE_KEY);
+    const { data: { user }, error: userError } = await supabase.auth.getUser(authHeader.replace('Bearer ', ''));
+    if (userError || !user) return json(401, { error: 'Unauthorized', error_code: 'INVALID_TOKEN', req_id });
 
-    const { amount_kobo } = await req.json();
-    if (!Number.isFinite(amount_kobo) || amount_kobo < 10000) {
-      return new Response(JSON.stringify({ error: "Minimum deposit is ₦100" }), {
-        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    const body = await req.json().catch(() => ({}));
+    const amount_kobo = Number(body?.amount_kobo);
+    if (!Number.isFinite(amount_kobo) || amount_kobo < 10000 || amount_kobo > 50000000) return json(400, { error: 'Deposit amount must be between ₦100 and ₦500,000', error_code: 'BAD_AMOUNT', req_id });
 
-    const transaction_ref = `SQUAD_TOPUP_${user.id}_${Date.now()}`;
-    const origin = req.headers.get("origin") || "https://unigig.site";
+    const transaction_ref = `SQUAD_TOPUP_${user.id}_${crypto.randomUUID()}`;
+    const origin = req.headers.get('origin') || 'https://unigig.site';
 
-    // Initiate Squad transaction
-    const initRes = await fetch(`${SQUAD_BASE}/transaction/initiate`, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${SQUAD_SECRET_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        amount: amount_kobo,
-        email: user.email,
-        currency: "NGN",
-        initiate_type: "inline",
-        transaction_ref,
-        callback_url: `${origin}/payment/callback`,
-        customer_name: user.user_metadata?.full_name || "Nexora User",
-      }),
+    const { error: topupErr } = await supabase.from('wallet_topups').insert({ user_id: user.id, amount_kobo, squad_reference: transaction_ref, status: 'pending', transaction_status: 'pending' });
+    if (topupErr) throw topupErr;
+
+    const initRes = await fetchWithTimeout(`${baseUrl()}/transaction/initiate`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${SQUAD_SECRET_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ amount: amount_kobo, email: user.email, currency: 'NGN', initiate_type: 'inline', transaction_ref, callback_url: `${origin}/payment/callback?reference=${encodeURIComponent(transaction_ref)}`, customer_name: user.user_metadata?.full_name || 'Nexora User' }),
     });
-
-    const initData = await initRes.json();
-    console.log("Squad init response:", JSON.stringify(initData));
-
-    if (!initData?.status || !initData?.data?.checkout_url) {
-      return new Response(JSON.stringify({ error: initData?.message || "Squad init failed" }), {
-        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    const text = await initRes.text();
+    const initData = text ? JSON.parse(text) : {};
+    if (!initRes.ok || !initData?.data?.checkout_url) {
+      await supabase.from('wallet_topups').update({ status: 'failed', transaction_status: 'failed' }).eq('squad_reference', transaction_ref);
+      log(req_id, 'warn', 'SQUAD_INIT_FAILED', 'Squad init rejected', { upstream_status: initRes.status, duration_ms: Date.now() - started });
+      return json(502, { error: initData?.message || 'Payment initialization failed', error_code: 'SQUAD_INIT_FAILED', upstream_status: initRes.status, req_id });
     }
 
-    // Record pending topup (use existing wallet_topups table)
-    await supabase.from("wallet_topups").insert({
-      user_id: user.id,
-      amount_kobo,
-      squad_reference: transaction_ref,
-      status: "pending",
-    });
-
-    return new Response(JSON.stringify({
-      success: true,
-      authorization_url: initData.data.checkout_url,
-      reference: transaction_ref,
-      provider: "squad",
-    }), {
-      status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    log(req_id, 'info', 'OK', 'Topup initialized', { duration_ms: Date.now() - started });
+    return json(200, { success: true, authorization_url: initData.data.checkout_url, reference: transaction_ref, provider: 'squad', req_id });
   } catch (err) {
-    console.error("squad-topup-initialize error:", err);
-    return new Response(JSON.stringify({ error: "Squad deposit initialization failed", detail: (err as Error).message, error_code: "SQUAD_TOPUP_FAILED" }), {
-      status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    log(req_id, 'error', 'EXCEPTION', 'Topup init crashed safely', { err: (err as Error).message, duration_ms: Date.now() - started });
+    return json(502, { error: 'Deposit initialization failed', error_code: 'SQUAD_TOPUP_FAILED', req_id });
   }
 });
