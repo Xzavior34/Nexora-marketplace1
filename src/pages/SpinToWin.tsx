@@ -58,37 +58,8 @@ export default function SpinToWin() {
     setTickets(prev => Math.max(0, prev - 1));
 
     if (user && amount > 0) {
-      try {
-        const newBalance = (profile?.wallet_balance || 0) + (amount * 100);
-
-        const { error: updateError } = await supabase
-          .from('profiles')
-          .update({ wallet_balance: newBalance })
-          .eq('id', user.id);
-
-        if (updateError) throw updateError;
-
-        await supabase.from('wallet_transactions').insert({
-          user_id: user.id,
-          type: 'deposit',
-          amount_kobo: amount * 100,
-          balance_after_kobo: newBalance,
-          description: `Won ₦${amount} from Spin to Win ticket!`,
-        });
-
-        await supabase.from('notifications').insert({
-          user_id: user.id,
-          title: 'Prize Claimed!',
-          body: `₦${amount} has been added to your wallet. Congratulations!`,
-          data: { type: 'promo_win', amount },
-        });
-
-        await refreshProfile();
-        toast.success(`₦${amount} added to your wallet!`);
-      } catch (err) {
-        console.error('Error claiming prize:', err);
-        toast.error('Failed to process winnings. Please contact support.');
-      }
+      await refreshProfile();
+      toast.success(`₦${amount} added to your wallet!`);
     } else if (amount === 0) {
       toast.info("Aww, no win this time! Earn another ticket to try again.");
     }

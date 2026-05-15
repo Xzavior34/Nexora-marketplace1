@@ -1040,6 +1040,39 @@ export type Database = {
         }
         Relationships: []
       }
+      system_activity_log: {
+        Row: {
+          created_at: string
+          duration_ms: number | null
+          event_type: string
+          id: string
+          metadata: Json
+          request_id: string | null
+          severity: string
+          source: string
+        }
+        Insert: {
+          created_at?: string
+          duration_ms?: number | null
+          event_type: string
+          id?: string
+          metadata?: Json
+          request_id?: string | null
+          severity?: string
+          source: string
+        }
+        Update: {
+          created_at?: string
+          duration_ms?: number | null
+          event_type?: string
+          id?: string
+          metadata?: Json
+          request_id?: string | null
+          severity?: string
+          source?: string
+        }
+        Relationships: []
+      }
       task_applications: {
         Row: {
           applicant_id: string
@@ -1843,6 +1876,16 @@ export type Database = {
       process_ambassador_reward: {
         Args: { p_amount_kobo: number; p_user_id: string }
         Returns: undefined
+      }
+      process_squad_wallet_credit: {
+        Args: {
+          p_amount_kobo?: number
+          p_metadata?: Json
+          p_reference: string
+          p_source?: string
+          p_user_id?: string
+        }
+        Returns: Json
       }
       process_withdrawal: {
         Args: {

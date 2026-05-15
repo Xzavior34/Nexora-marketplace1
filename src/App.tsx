@@ -36,6 +36,7 @@ import ResetPassword from "./pages/ResetPassword";
 import SpinToWin from "./pages/SpinToWin"; 
 import Leaderboard from "./pages/Leaderboard"; // <-- Added import for Leaderboard
 import NotFound from "./pages/NotFound";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 const queryClient = new QueryClient();
 
@@ -67,6 +68,7 @@ const App = () => (
           <LenisInit />
           <Navbar />
           <div className="pb-16 md:pb-0">
+            <ErrorBoundary fallbackTitle="Nexora recovered safely">
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
@@ -97,6 +99,7 @@ const App = () => (
               <Route path="/leaderboard" element={<Leaderboard />} /> {/* <-- Added route */}
               <Route path="*" element={<NotFound />} />
             </Routes>
+            </ErrorBoundary>
           </div>
           <BottomNavWrapper />
         </BrowserRouter>
