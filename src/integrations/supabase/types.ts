@@ -441,6 +441,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "messages_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "task_applications_with_poster"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "messages_recipient_id_fkey"
             columns: ["recipient_id"]
             isOneToOne: false
@@ -1428,6 +1435,53 @@ export type Database = {
         }
         Relationships: []
       }
+      task_applications_with_poster: {
+        Row: {
+          applicant_id: string | null
+          created_at: string | null
+          id: string | null
+          poster_id: string | null
+          status: string | null
+          task_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_applications_applicant_id_fkey"
+            columns: ["applicant_id"]
+            isOneToOne: false
+            referencedRelation: "leaderboard_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "task_applications_applicant_id_fkey"
+            columns: ["applicant_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "task_applications_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_poster_id_fkey"
+            columns: ["poster_id"]
+            isOneToOne: false
+            referencedRelation: "leaderboard_stats"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_poster_id_fkey"
+            columns: ["poster_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       add_spin_ticket: { Args: { p_user_id: string }; Returns: undefined }
@@ -1874,6 +1928,7 @@ export type Database = {
         | "commission"
         | "withdrawal"
         | "refund"
+        | "payout"
     }
     CompositeTypes: {
       http_header: {
@@ -2033,6 +2088,7 @@ export const Constants = {
         "commission",
         "withdrawal",
         "refund",
+        "payout",
       ],
     },
   },
