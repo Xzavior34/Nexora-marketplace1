@@ -40,28 +40,61 @@ export default function PaymentCallback() {
             await refreshProfile();
             setStatus('success');
             setMessage(`Deposit confirmed! Your wallet has been funded with ₦${((topup.amount_kobo || 0) / 100).toLocaleString()} via Squad.`);
-          } else {
-            // Poll for status update
-            setStatus('success');
-            setMessage('Deposit is being processed. Please wait...');
-            
-            const pollInterval = setInterval(async () => {
-              const { data: updated } = await (supabase as any)
-                .from('wallet_topups')
-                .select('status, amount_kobo')
-                .eq('squad_reference', ref)
-                .single();
-              
-              if (updated?.status === 'success') {
-                clearInterval(pollInterval);
-                await refreshProfile();
-                setMessage(`Deposit confirmed! Your wallet has been funded with ₦${((updated.amount_kobo || 0) / 100).toLocaleString()} via Squad.`);
-              }
-            }, 3000);
-            
-            // Clear after 60 seconds
-            setTimeout(() => clearInterval(pollInterval), 60000);
+            return;
           }
+
+          setStatus('success');
+          setMessage('Deposit is being processed. Verifying with Squad...');
+
+          // Active verification fallback — don't rely solely on webhook.
+          const tryVerify = async () => {
+            try {
+              const { data: vr } = await supabase.functions.invoke('squad-verify-deposit', {
+                body: { reference: ref },
+              });
+              if (vr?.success || vr?.already_credited) {
+                await refreshProfile();
+                const { data: fresh } = await (supabase as any)
+                  .from('wallet_topups')
+                  .select('amount_kobo, status')
+                  .eq('squad_reference', ref)
+                  .maybeSingle();
+                setMessage(`Deposit confirmed! Your wallet has been funded with ₦${((fresh?.amount_kobo || topup.amount_kobo || 0) / 100).toLocaleString()} via Squad.`);
+                return true;
+              }
+            } catch (e) {
+              console.warn('verify attempt failed', e);
+            }
+            return false;
+          };
+
+          if (await tryVerify()) return;
+
+          // Poll: keep checking topup row (webhook) AND retry active verify periodically.
+          let attempts = 0;
+          const pollInterval = setInterval(async () => {
+            attempts += 1;
+            const { data: updated } = await (supabase as any)
+              .from('wallet_topups')
+              .select('status, amount_kobo')
+              .eq('squad_reference', ref)
+              .single();
+
+            if (updated?.status === 'success') {
+              clearInterval(pollInterval);
+              await refreshProfile();
+              setMessage(`Deposit confirmed! Your wallet has been funded with ₦${((updated.amount_kobo || 0) / 100).toLocaleString()} via Squad.`);
+              return;
+            }
+
+            // Re-trigger active verify every ~9s
+            if (attempts % 3 === 0) {
+              const ok = await tryVerify();
+              if (ok) clearInterval(pollInterval);
+            }
+          }, 3000);
+
+          setTimeout(() => clearInterval(pollInterval), 90000);
           return;
         }
 
