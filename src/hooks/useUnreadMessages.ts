@@ -15,10 +15,10 @@ export function useUnreadMessages() {
     const fetchUnread = async () => {
       // Count messages where user is involved but didn't send the last message
       // Simple approach: count distinct conversations with unread messages
-      const { data: tasks } = await supabase
-        .from('task_applications')
-        .select('task_id, tasks!inner(poster_id)')
-        .or(`applicant_id.eq.${user.id},tasks.poster_id.eq.${user.id}`);
+      const { data: tasks } = await (supabase as any)
+        .from('task_applications_with_poster')
+        .select('task_id, applicant_id, poster_id')
+        .or(`applicant_id.eq.${user.id},poster_id.eq.${user.id}`);
 
       if (!tasks || tasks.length === 0) {
         setUnreadCount(0);
