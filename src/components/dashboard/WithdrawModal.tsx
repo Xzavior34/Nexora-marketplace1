@@ -252,12 +252,16 @@ export default function WithdrawModal({ open, onClose, balance, profile, onSucce
                 />
               </div>
 
-              {accountName && (
-                <div className="flex items-center gap-2 p-3 bg-secondary rounded-lg">
-                  <CheckCircle2 className="h-5 w-5 text-primary" />
-                  <span className="font-medium text-foreground">{accountName}</span>
-                </div>
-              )}
+              <div className="space-y-2">
+                <Label>Account Name <span className="text-xs text-muted-foreground">(as it appears on your bank account)</span></Label>
+                <Input
+                  type="text"
+                  placeholder="e.g. John Adebayo Doe"
+                  value={accountName}
+                  onChange={(e) => setAccountName(e.target.value || '')}
+                />
+                <p className="text-xs text-muted-foreground">Admin will verify this before payout. No verification required to submit.</p>
+              </div>
 
               <div className="flex gap-2">
                 <Button
