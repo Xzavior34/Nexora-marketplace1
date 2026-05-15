@@ -1615,6 +1615,10 @@ export type Database = {
       }
       get_squad_trust_score: { Args: { _user_id: string }; Returns: number }
       get_user_email_internal: { Args: { p_user_id: string }; Returns: string }
+      handle_squad_deposit: {
+        Args: { p_amount_kobo: number; p_reference: string; p_user_id: string }
+        Returns: Json
+      }
       hire_and_escrow: {
         Args: {
           p_application_id?: string
