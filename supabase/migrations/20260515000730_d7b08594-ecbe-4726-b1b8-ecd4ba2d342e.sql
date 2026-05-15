@@ -1,0 +1,1 @@
+ALTER VIEW public.task_applications_with_poster SET (security_invoker = true);
