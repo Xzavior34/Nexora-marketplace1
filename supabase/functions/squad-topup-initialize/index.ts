@@ -1,4 +1,7 @@
+// @ts-expect-error - Supabase module imports cause TS errors in non-Deno setups
 import { createClient } from 'npm:@supabase/supabase-js@2.89.0';
+// @ts-expect-error - Deno URL imports cause TS errors in non-Deno setups
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 
 declare const Deno: {
   env: { get(key: string): string | undefined; };
@@ -24,7 +27,7 @@ async function fetchWithTimeout(url: string, init: RequestInit, ms = 10000) {
   try { return await fetch(url, { ...init, signal: controller.signal }); } finally { clearTimeout(timer); }
 }
 
-Deno.serve(async (req) => {
+serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   const req_id = req.headers.get('x-request-id') || rid();
   const started = Date.now();

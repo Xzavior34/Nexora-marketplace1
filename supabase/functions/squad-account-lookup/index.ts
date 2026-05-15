@@ -1,3 +1,4 @@
+// @ts-expect-error - Deno URL imports cause TS errors in non-Deno setups
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 
 declare const Deno: {
@@ -69,7 +70,7 @@ async function callSquad(baseUrl: string, secret: string, payload: Record<string
   return last;
 }
 
-serve(async (req) => {
+serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   const req_id = req.headers.get('x-request-id') || rid();
   const started = Date.now();

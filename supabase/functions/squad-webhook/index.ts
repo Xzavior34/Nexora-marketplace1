@@ -1,4 +1,7 @@
+// @ts-expect-error - Supabase module imports cause TS errors in non-Deno setups
 import { createClient } from 'npm:@supabase/supabase-js@2.89.0';
+// @ts-expect-error - Deno URL imports cause TS errors in non-Deno setups
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 
 declare const Deno: {
   env: { get(key: string): string | undefined; };
@@ -47,7 +50,7 @@ const normalizeAmount = (value: unknown) => {
   return Number.isFinite(n) && n > 0 ? Math.round(n) : 0;
 };
 
-Deno.serve(async (req) => {
+serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   const req_id = req.headers.get('x-request-id') || rid();
   const started = Date.now();
