@@ -66,7 +66,7 @@ export function Navbar() {
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
             <div className="w-8 h-8 bg-gradient-hero rounded-lg flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">UG</span>
+              <span className="text-primary-foreground font-bold text-sm">N</span>
             </div>
             <span className="font-bold text-lg text-foreground hidden sm:block">Nexora</span>
           </Link>
